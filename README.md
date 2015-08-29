@@ -1,4 +1,5 @@
 # prismarine-block
+[![NPM version](https://img.shields.io/npm/v/prismarine-block.svg)](http://npmjs.com/package/prismarine-block)
 
 Represent a minecraft block with its associated data
 
