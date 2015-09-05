@@ -64,7 +64,7 @@ See http://www.minecraftwiki.net/wiki/Data_values#Data
 
 #### block.biome
 
-A biome instance. See `Biome`.
+A biome instance. See [Biome](https://github.com/prismarinejs/prismarine-biome#api).
 
 #### block.signText
 
