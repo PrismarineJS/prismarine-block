@@ -24,6 +24,13 @@ console.log(stoneBlock.digTime(257));
 
 ### Block
 
+#### Block(type,biomeId,metadata)
+
+Constructor of a block
+* `type` is the block numerical id
+* `biomeId` is the biome numerical id
+* `metadata` is the metadata numerical value
+
 #### block.canHarvest(heldItemType)
 
 Tells you if `heldItemType` is one of the right tool to harvest the block.
