@@ -6,7 +6,7 @@ Represent a minecraft block with its associated data
 ## Usage
 
 ```js
-var Block=require("minecraft-data")("1.8");
+var Block=require("prismarine-block")("1.8");
 
 var stoneBlock=new Block(1,1,0);
 
