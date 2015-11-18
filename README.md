@@ -37,7 +37,7 @@ Tells you if `heldItemType` is one of the right tool to harvest the block.
 
  * `heldItemType` the id of the held item (or null if nothing is held)
 
-#### block.staticDigTime(heldItemType,creative,inWater,notOnGround)
+#### block.digTime(heldItemType,creative,inWater,notOnGround)
 
 Tells you how long it will take to dig the block, in milliseconds.
 
