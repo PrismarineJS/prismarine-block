@@ -115,6 +115,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.0.0
+
+* bump dependencies
+
 ### 0.1.0
 
 * Import from mineflayer
