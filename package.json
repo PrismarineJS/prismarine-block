@@ -11,13 +11,13 @@
     "url": "https://github.com/PrismarineJS/prismarine-block.git"
   },
   "dependencies": {
-    "prismarine-biome":"0.1.0"
+    "prismarine-biome":"^1.0.0"
   },
   "peerDependencies": {
-    "minecraft-data":"0.x"
+    "minecraft-data":"1.x"
   },
   "devDependencies": {
-    "minecraft-data":"0.x"
+    "minecraft-data":"1.x"
   },
   "keywords": [
     "prismarine",
