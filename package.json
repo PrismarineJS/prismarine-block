@@ -14,10 +14,10 @@
     "prismarine-biome":"^1.0.0"
   },
   "peerDependencies": {
-    "minecraft-data":"1.x"
+    "minecraft-data":"^2.0.0"
   },
   "devDependencies": {
-    "minecraft-data":"1.x"
+    "minecraft-data":"^2.0.0"
   },
   "keywords": [
     "prismarine",
