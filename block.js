@@ -13,7 +13,8 @@ function loader (mcVersion) {
   return Block
 }
 
-// Generates a block map type => metadata => template block, so that block names don't
+// Generates a block map type => metadata => template block, so that block displayNames
+// don't get recomputed every time a block is requested.
 function prepareBlocks (blocks) {
   let result = {}
   for (let type in blocks) {
