@@ -2,22 +2,31 @@
   "name": "prismarine-block",
   "version": "1.0.1",
   "description": "Represent a minecraft block with its associated data",
-  "main": "index.js",
+  "main": "block.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "posttest": "npm run lint",
+    "lint": "eslint .",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/PrismarineJS/prismarine-block.git"
   },
   "dependencies": {
-    "prismarine-biome":"^1.0.0"
+    "prismarine-biome": "^1.0.0"
   },
   "peerDependencies": {
-    "minecraft-data":"^2.0.0"
+    "minecraft-data": "^2.0.0"
   },
   "devDependencies": {
-    "minecraft-data":"^2.0.0"
+    "eslint": "^4.2.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "jest": "^21.0.0",
+    "minecraft-data": "^2.0.0"
   },
   "keywords": [
     "prismarine",
