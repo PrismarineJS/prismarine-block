@@ -13,10 +13,21 @@ describe('1.12.1 - Block', () => {
     expect(b1).not.toBe(b2)
   })
 
-  it('returns a block with expected properties and methods', () => {
-    let b = new Block(1)
+  it('returns correct display name for blocks without variations', () => {
+    let b = new Block(1, 0, 0)
     expect(b.name).toEqual('stone')
     expect(b.displayName).toEqual('Stone')
-    console.log(b)
+  })
+
+  it('returns correct display name for blocks with valid variation', () => {
+    let b = new Block(255, 0, 2)
+    expect(b.name).toEqual('structure_block')
+    expect(b.displayName).toEqual('Corner')
+  })
+
+  it('returns correct display name for blocks with valid invalid variation', () => {
+    let b = new Block(255, 0, 5)
+    expect(b.name).toEqual('structure_block')
+    expect(b.displayName).toEqual('Structure Block')
   })
 })

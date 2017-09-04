@@ -13,6 +13,7 @@ function loader (mcVersion) {
   return Block
 }
 
+// Generates a block map type => metadata => template block, so that block names don't
 function prepareBlocks (blocks) {
   let result = {}
   for (let blockId in blocks) {
@@ -32,21 +33,19 @@ function prepareBlock (block) {
     '*': prepared
   }
 
-  if ('variations' in block) {
-    for (var i in block['variations']) {
-      if (block['variations'][i].metadata) {
-        const displayName = block['variations'][i].displayName
-        const metadata = block['variations'][i].metadata
+  for (var i in (block['variations'] || {})) {
+    if (block['variations'][i].metadata !== undefined) {
+      const displayName = block['variations'][i].displayName
+      const metadata = block['variations'][i].metadata
 
-        result[metadata] = Object.assign({}, prepared, {displayName})
-      }
+      result[metadata] = Object.assign({}, prepared, {displayName})
     }
   }
 
   return result
 }
 
-const unknownBlockProps = {
+const unknownBlockTemplate = {
   name: '',
   displayName: '',
   hardness: 0,
@@ -56,20 +55,19 @@ const unknownBlockProps = {
 
 class Block {
   constructor (type, biomeId, metadata) {
-    this.type = type
-    this.biome = new Biome(biomeId)
-    this.metadata = metadata
-
-    this.light = 0
-    this.skyLight = 0
-    this.position = null
-
     const blockTemplates = blocks[type]
-    if (blockTemplates) {
-      Object.assign(this, blockTemplates[metadata] || blockTemplates['*'])
-    } else {
-      Object.assign(this, unknownBlockProps)
-    }
+    const blockTemplate = blockTemplates
+      ? (blockTemplates[metadata] || blockTemplates['*'])
+      : unknownBlockTemplate
+
+    Object.assign(this, {
+      type,
+      metadata,
+      biome: new Biome(biomeId),
+      light: 0,
+      skyLight: 0,
+      position: null
+    }, blockTemplate)
   }
 
   // http://minecraft.gamepedia.com/Breaking#Speed
@@ -93,6 +91,6 @@ class Block {
   }
 
   canHarvest (heldItemType) {
-    return !this.harvestTools || (heldItemType && this.harvestTools[heldItemType])
+    return !this.harvestTools || this.harvestTools[heldItemType]
   }
 }
