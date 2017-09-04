@@ -30,4 +30,10 @@ describe('1.12.1 - Block', () => {
     expect(b.name).toEqual('structure_block')
     expect(b.displayName).toEqual('Structure Block')
   })
+
+  it('returns fields found in template', () => {
+    let b = new Block(255, 0, 0)
+    expect(b.type).toEqual(255)
+    expect(b.metadata).toBe(0)
+  })
 })

@@ -16,18 +16,22 @@ function loader (mcVersion) {
 // Generates a block map type => metadata => template block, so that block names don't
 function prepareBlocks (blocks) {
   let result = {}
-  for (let blockId in blocks) {
-    result[blockId] = prepareBlock(blocks[blockId])
+  for (let type in blocks) {
+    result[type] = prepareBlock(blocks[type])
   }
   return result
 }
 
 function prepareBlock (block) {
-  let fields = ['name', 'hardness', 'displayName', 'boundingBox', 'diggable', 'material', 'harvestTools', 'drops']
+  let fields = [
+    'name', 'hardness', 'displayName', 'boundingBox',
+    'diggable', 'material', 'harvestTools', 'drops'
+  ]
+
   let prepared = fields.reduce((prepared, field) => {
     prepared[field] = block[field]
     return prepared
-  }, {})
+  }, {type: block.id})
 
   let result = {
     '*': prepared
@@ -38,7 +42,7 @@ function prepareBlock (block) {
       const displayName = block['variations'][i].displayName
       const metadata = block['variations'][i].metadata
 
-      result[metadata] = Object.assign({}, prepared, {displayName})
+      result[metadata] = Object.assign({}, prepared, {displayName, metadata})
     }
   }
 
@@ -61,8 +65,6 @@ class Block {
       : unknownBlockTemplate
 
     Object.assign(this, {
-      type,
-      metadata,
       biome: new Biome(biomeId),
       light: 0,
       skyLight: 0,
