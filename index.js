@@ -1,74 +1,71 @@
-module.exports = loader;
+module.exports = loader
 
-function loader(mcVersion)
-{
-  var mcData=require('minecraft-data')(mcVersion);
-  Biome = require('prismarine-biome')(mcVersion);
-  blocks=mcData.blocks;
-  toolMultipliers = mcData.materials;
-  return Block;
+function loader (mcVersion) {
+  const mcData = require('minecraft-data')(mcVersion)
+  Biome = require('prismarine-biome')(mcVersion)
+  blocks = mcData.blocks
+  toolMultipliers = mcData.materials
+  return Block
 }
 
-var Biome;
-var blocks;
-var toolMultipliers;
+let Biome
+let blocks
+let toolMultipliers
 
+function Block (type, biomeId, metadata) {
+  this.type = type
+  this.metadata = metadata
+  this.light = 0
+  this.skyLight = 0
+  this.biome = new Biome(biomeId)
+  this.position = null
 
-function Block(type, biomeId, metadata) {
-  this.type = type;
-  this.metadata = metadata;
-  this.light = 0;
-  this.skyLight = 0;
-  this.biome = new Biome(biomeId);
-  this.position = null;
-
-  var blockEnum = blocks[type];
-  if(blockEnum) {
-    this.name = blockEnum.name;
-    this.hardness = blockEnum.hardness;
-    this.displayName = blockEnum.displayName;
-    if("variations" in blockEnum)
-      for(var i in blockEnum["variations"]) {
-        if(blockEnum["variations"][i].metadata === metadata)
-          this.displayName = blockEnum["variations"][i].displayName;
-      }
-    this.boundingBox = blockEnum.boundingBox;
-    this.diggable = blockEnum.diggable;
-    this.material = blockEnum.material;
-    this.harvestTools = blockEnum.harvestTools;
-    this.drops = blockEnum.drops;
+  const blockEnum = blocks[type]
+  if (blockEnum) {
+    this.name = blockEnum.name
+    this.hardness = blockEnum.hardness
+    this.displayName = blockEnum.displayName
+    if ('variations' in blockEnum) {
+      Object.keys(blockEnum['variations']).forEach(i => {
+        if (blockEnum['variations'][i].metadata === metadata) { this.displayName = blockEnum['variations'][i].displayName }
+      })
+    }
+    this.boundingBox = blockEnum.boundingBox
+    this.diggable = blockEnum.diggable
+    this.material = blockEnum.material
+    this.harvestTools = blockEnum.harvestTools
+    this.drops = blockEnum.drops
   } else {
-    this.name = "";
-    this.displayName = "";
-    this.hardness = 0;
-    this.boundingBox = "empty";
-    this.diggable = false;
+    this.name = ''
+    this.displayName = ''
+    this.hardness = 0
+    this.boundingBox = 'empty'
+    this.diggable = false
   }
 }
 
-Block.prototype.canHarvest = function(heldItemType) {
-  if(this.harvestTools) {
-    var penalty = heldItemType === null || !this.harvestTools[heldItemType];
-    if(penalty) return false;
+Block.prototype.canHarvest = function (heldItemType) {
+  if (this.harvestTools) {
+    const penalty = heldItemType === null || !this.harvestTools[heldItemType]
+    if (penalty) return false
   }
-  return true;
-};
+  return true
+}
 
 // http://minecraft.gamepedia.com/Breaking#Speed
-Block.prototype.digTime = function(heldItemType,creative, inWater, notOnGround) {
-  if(creative) return 0;
-  var time = 1000 * this.hardness * 1.5;
+Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround) {
+  if (creative) return 0
+  let time = 1000 * this.hardness * 1.5
 
-  if(!this.canHarvest(heldItemType))
-    return time * 10 / 3;
+  if (!this.canHarvest(heldItemType)) { return time * 10 / 3 }
 
   // If the tool helps, then it increases digging speed by a constant multiplier
-  var toolMultiplier = toolMultipliers[this.material];
-  if(toolMultiplier && heldItemType) {
-    var multiplier = toolMultiplier[heldItemType];
-    if(multiplier) time /= multiplier;
+  const toolMultiplier = toolMultipliers[this.material]
+  if (toolMultiplier && heldItemType) {
+    const multiplier = toolMultiplier[heldItemType]
+    if (multiplier) time /= multiplier
   }
-  if(notOnGround) time *= 5;
-  if(inWater) time *= 5;
-  return time;
-};
+  if (notOnGround) time *= 5
+  if (inWater) time *= 5
+  return time
+}
