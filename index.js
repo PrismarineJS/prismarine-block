@@ -29,6 +29,9 @@ function Block (type, biomeId, metadata, stateId) {
 
   const blockEnum = stateId === undefined ? blocks[type] : blocksByStateId[stateId]
   if (blockEnum) {
+    if (stateId === undefined) {
+      this.stateId = blockEnum.minStateId
+    }
     this.type = blockEnum.id
     this.name = blockEnum.name
     this.hardness = blockEnum.hardness
