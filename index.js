@@ -4,24 +4,32 @@ function loader (mcVersion) {
   const mcData = require('minecraft-data')(mcVersion)
   Biome = require('prismarine-biome')(mcVersion)
   blocks = mcData.blocks
+  blocksByStateId = mcData.blocksByStateId
   toolMultipliers = mcData.materials
   return Block
 }
 
 let Biome
 let blocks
+let blocksByStateId
 let toolMultipliers
 
-function Block (type, biomeId, metadata) {
+Block.fromStateId = function (stateId, biomeId) {
+  return new Block(undefined, biomeId, 0, stateId)
+}
+
+function Block (type, biomeId, metadata, stateId) {
   this.type = type
   this.metadata = metadata
   this.light = 0
   this.skyLight = 0
   this.biome = new Biome(biomeId)
   this.position = null
+  this.stateId = stateId
 
-  const blockEnum = blocks[type]
+  const blockEnum = stateId === undefined ? blocks[type] : blocksByStateId[stateId]
   if (blockEnum) {
+    this.type = blockEnum.id
     this.name = blockEnum.name
     this.hardness = blockEnum.hardness
     this.displayName = blockEnum.displayName

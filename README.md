@@ -25,6 +25,8 @@ console.log(stoneBlock.digTime(257));
 
 ### Block
 
+#### Block.fromStateId(stateId, biomeId)
+
 #### Block(type,biomeId,metadata)
 
 Constructor of a block

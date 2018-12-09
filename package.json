@@ -18,7 +18,7 @@
     "minecraft-data": "^2.0.0"
   },
   "devDependencies": {
-    "minecraft-data": "^2.0.0",
+    "minecraft-data": "^2.35.0",
     "standard": "^11.0.1"
   },
   "keywords": [
