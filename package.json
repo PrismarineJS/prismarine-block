@@ -21,7 +21,7 @@
   "devDependencies": {
     "minecraft-data": "^2.35.0",
     "standard": "^11.0.1",
-    "@types/vec3": "^0.0.29",
+    "@types/vec3": "^0.0.29"
   },
   "keywords": [
     "prismarine",

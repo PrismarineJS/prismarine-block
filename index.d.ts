@@ -2,9 +2,8 @@
  * These typings have yet to be extensively tested
  * Paintings and signs are not declared because they aren't actually implemented
  */
-export = prismarine_block;
 import { Vec3 } from "vec3";
-declare function prismarine_block(mcVersion: string): Block;
+export default function prismarine_block(mcVersion: string): Block;
 interface Biome {
     id: number;
     name: string;
@@ -12,7 +11,7 @@ interface Biome {
     rainfall: number;
     temperature: number;
 }
-declare class Block {
+export class Block {
     constructor(type: number, biomeId: number, metadata: number);
 
     canHarvest(heldItemType: number): boolean;
