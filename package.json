@@ -3,6 +3,7 @@
   "version": "1.1.1",
   "description": "Represent a minecraft block with its associated data",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "npm run lint",
     "lint": "standard"
@@ -19,7 +20,8 @@
   },
   "devDependencies": {
     "minecraft-data": "^2.35.0",
-    "standard": "^11.0.1"
+    "standard": "^11.0.1",
+    "@types/vec3": "^0.0.29",
   },
   "keywords": [
     "prismarine",
