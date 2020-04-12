@@ -118,6 +118,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.2.0
+
+* Prevent data from being shared to avoid conflicts across multiple versions (thanks @hornta)
+
 ### 1.1.1
 
 * use the minStateId if passing the blockType
