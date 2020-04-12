@@ -7,10 +7,10 @@ function loader (mcVersion) {
     blocks: mcData.blocks,
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials
-  });
+  })
 }
 
-function provider({ Biome, blocks, blocksByStateId, toolMultipliers }) {
+function provider ({ Biome, blocks, blocksByStateId, toolMultipliers }) {
   Block.fromStateId = function (stateId, biomeId) {
     return new Block(undefined, biomeId, 0, stateId)
   }
@@ -77,5 +77,5 @@ function provider({ Biome, blocks, blocksByStateId, toolMultipliers }) {
     if (inWater) time *= 5
     return time
   }
-  return Block;
+  return Block
 }
