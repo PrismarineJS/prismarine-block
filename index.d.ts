@@ -30,4 +30,4 @@ declare class Block {
     fromStateId(stateId: number, biomeId: number): Block;
 }
 
-export declare function loader(mcVersion: string): keyof Block;
+export declare function loader(mcVersion: string): typeof Block;
