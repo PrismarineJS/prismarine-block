@@ -118,6 +118,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.3.0
+
+* add typescript definitions (thanks @IdanHo)
+
 ### 1.2.0
 
 * Prevent data from being shared to avoid conflicts across multiple versions (thanks @hornta)
