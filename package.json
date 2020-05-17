@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "minecraft-data": "^2.35.0",
-    "standard": "^11.0.1",
+    "standard": "^14.3.4",
     "vec3": "^0.1.4"
   },
   "keywords": [
