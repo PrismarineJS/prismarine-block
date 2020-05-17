@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run lint",
+    "fix": "standard --fix",
     "lint": "standard"
   },
   "repository": {
