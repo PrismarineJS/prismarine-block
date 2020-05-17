@@ -34,8 +34,8 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers }) {
       this.hardness = blockEnum.hardness
       this.displayName = blockEnum.displayName
       if ('variations' in blockEnum) {
-        Object.keys(blockEnum['variations']).forEach(i => {
-          if (blockEnum['variations'][i].metadata === metadata) { this.displayName = blockEnum['variations'][i].displayName }
+        Object.keys(blockEnum.variations).forEach(i => {
+          if (blockEnum.variations[i].metadata === metadata) { this.displayName = blockEnum.variations[i].displayName }
         })
       }
       this.boundingBox = blockEnum.boundingBox
