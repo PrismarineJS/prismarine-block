@@ -6,13 +6,42 @@ function loader (mcVersion) {
     Biome: require('prismarine-biome')(mcVersion),
     blocks: mcData.blocks,
     blocksByStateId: mcData.blocksByStateId,
-    toolMultipliers: mcData.materials
+    toolMultipliers: mcData.materials,
+    shapes: mcData.blockCollisionShapes
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, toolMultipliers }) {
+function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes }) {
   Block.fromStateId = function (stateId, biomeId) {
     return new Block(undefined, biomeId, 0, stateId)
+  }
+
+  if (shapes) {
+    // Prepare block shapes
+    for (const id in blocks) {
+      const block = blocks[id]
+      const shapesId = shapes.blocks[block.name]
+      block.shapes = (shapesId instanceof Array) ? shapes.shapes[shapesId[0]] : shapes.shapes[shapesId]
+      if ('states' in block) { // post 1.13
+        if (shapesId instanceof Array) {
+          block.stateShapes = []
+          for (const i in shapesId) {
+            block.stateShapes.push(shapes.shapes[shapesId[i]])
+          }
+        }
+      } else { // pre 1.13
+        if ('variations' in block) {
+          for (const i in block.variations) {
+            const metadata = block.variations[i].metadata
+            if (shapesId instanceof Array) {
+              block.variations[i].shapes = shapes.shapes[shapesId[metadata]]
+            } else {
+              block.variations[i].shapes = shapes.shapes[shapesId]
+            }
+          }
+        }
+      }
+    }
   }
 
   function Block (type, biomeId, metadata, stateId) {
@@ -33,10 +62,17 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers }) {
       this.name = blockEnum.name
       this.hardness = blockEnum.hardness
       this.displayName = blockEnum.displayName
-      if ('variations' in blockEnum) {
-        Object.keys(blockEnum.variations).forEach(i => {
-          if (blockEnum.variations[i].metadata === metadata) { this.displayName = blockEnum.variations[i].displayName }
-        })
+      this.shapes = blockEnum.shapes
+      if ('stateShapes' in blockEnum) {
+        this.shapes = blockEnum.stateShapes[this.stateId - blockEnum.minStateId]
+      } else if ('variations' in blockEnum) {
+        const variations = blockEnum.variations
+        for (const i in variations) {
+          if (variations[i].metadata === metadata) {
+            this.displayName = variations[i].displayName
+            this.shapes = variations[i].shapes
+          }
+        }
       }
       this.boundingBox = blockEnum.boundingBox
       this.diggable = blockEnum.diggable
@@ -46,6 +82,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers }) {
     } else {
       this.name = ''
       this.displayName = ''
+      this.shapes = []
       this.hardness = 0
       this.boundingBox = 'empty'
       this.diggable = false

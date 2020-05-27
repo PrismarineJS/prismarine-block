@@ -61,6 +61,10 @@ Numerical id.
 
 #### block.displayName
 
+#### block.shapes
+
+Array of bounding boxes representing the block shape. Each bounding box is an array of the form `[xmin, ymin, zmin, xmax, ymax, zmax]`. Depends on the type and state of the block.
+
 #### block.metadata
 
 Number which represents different things depending on the block.
