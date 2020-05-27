@@ -15,3 +15,6 @@ const BlockNew = require('./')('1.13.2')
 const redstoneBlock = BlockNew.fromStateId(3381, 0)
 
 console.log(redstoneBlock)
+
+console.log(BlockNew.fromStateId(1649, 0).shapes) // stairs
+console.log(BlockNew.fromStateId(1651, 0).shapes) // stairs
