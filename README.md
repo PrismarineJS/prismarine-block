@@ -122,6 +122,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.4.0
+
+* add block shapes (thanks @Karang)
+
 ### 1.3.0
 
 * add typescript definitions (thanks @IdanHo)
