@@ -122,6 +122,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.5.0
+
+* Fix block metadata for 1.13+
+
 ### 1.4.0
 
 * add block shapes (thanks @Karang)
