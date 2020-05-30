@@ -57,6 +57,8 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes }) 
     if (blockEnum) {
       if (stateId === undefined) {
         this.stateId = blockEnum.minStateId
+      } else {
+        this.metadata = this.stateId - blockEnum.minStateId
       }
       this.type = blockEnum.id
       this.name = blockEnum.name
@@ -64,7 +66,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes }) 
       this.displayName = blockEnum.displayName
       this.shapes = blockEnum.shapes
       if ('stateShapes' in blockEnum) {
-        this.shapes = blockEnum.stateShapes[this.stateId - blockEnum.minStateId]
+        this.shapes = blockEnum.stateShapes[this.metadata]
       } else if ('variations' in blockEnum) {
         const variations = blockEnum.variations
         for (const i in variations) {
