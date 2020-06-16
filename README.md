@@ -122,6 +122,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.5.1
+
+* Make Block.fromStateId work for all versions
+
 ### 1.5.0
 
 * Fix block metadata for 1.13+
