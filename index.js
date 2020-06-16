@@ -7,13 +7,19 @@ function loader (mcVersion) {
     blocks: mcData.blocks,
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
-    shapes: mcData.blockCollisionShapes
+    shapes: mcData.blockCollisionShapes,
+    majorVersion: mcData.version.majorVersion
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes }) {
+function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, majorVersion }) {
   Block.fromStateId = function (stateId, biomeId) {
-    return new Block(undefined, biomeId, 0, stateId)
+    if (majorVersion === '1.8' || majorVersion === '1.9' || majorVersion === '1.10' || majorVersion === '1.11' ||
+    majorVersion === '1.12') {
+      return new Block(stateId >> 4, biomeId, stateId & 15)
+    } else {
+      return new Block(undefined, biomeId, 0, stateId)
+    }
   }
 
   if (shapes) {
