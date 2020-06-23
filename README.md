@@ -124,6 +124,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.6.0
+
+* Add enchantments and effects to dig time computation (thanks @Karang)
+
 ### 1.5.1
 
 * Make Block.fromStateId work for all versions
