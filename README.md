@@ -40,7 +40,7 @@ Tells you if `heldItemType` is one of the right tool to harvest the block.
 
  * `heldItemType` the id of the held item (or null if nothing is held)
 
-#### block.digTime(heldItemType,creative,inWater,notOnGround)
+#### block.digTime(heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {})
 
 Tells you how long it will take to dig the block, in milliseconds.
 
@@ -48,6 +48,8 @@ Tells you how long it will take to dig the block, in milliseconds.
  * `creative` game in creative
  * `inWater` the bot is in water
  * `notOnGround` the bot is not on the ground
+ * `enchantments` list of enchantments from the held item (from simplified nbt data)
+ * `effects` effects on the bot (bot.entity.effects)
 
 #### block.position
 
