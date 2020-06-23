@@ -8,11 +8,12 @@ function loader (mcVersion) {
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
-    majorVersion: mcData.version.majorVersion
+    majorVersion: mcData.version.majorVersion,
+    effectsByName: mcData.effectsByName
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, majorVersion }) {
+function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, majorVersion, effectsByName }) {
   Block.fromStateId = function (stateId, biomeId) {
     if (majorVersion === '1.8' || majorVersion === '1.9' || majorVersion === '1.10' || majorVersion === '1.11' ||
     majorVersion === '1.12') {
@@ -98,29 +99,65 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
   }
 
   Block.prototype.canHarvest = function (heldItemType) {
-    if (this.harvestTools) {
-      const penalty = heldItemType === null || !this.harvestTools[heldItemType]
-      if (penalty) return false
-    }
-    return true
+    return heldItemType && this.harvestTools && this.harvestTools[heldItemType]
   }
 
-  // http://minecraft.gamepedia.com/Breaking#Speed
-  Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround) {
-    if (creative) return 0
-    let time = 1000 * this.hardness * 1.5
+  function effectLevel (effect, effects) {
+    const e = effects[effectsByName[effect]]
+    return e ? e.amplifier : -1
+  }
 
-    if (!this.canHarvest(heldItemType)) { return time * 10 / 3 }
-
-    // If the tool helps, then it increases digging speed by a constant multiplier
-    const toolMultiplier = toolMultipliers[this.material]
-    if (toolMultiplier && heldItemType) {
-      const multiplier = toolMultiplier[heldItemType]
-      if (multiplier) time /= multiplier
+  function enchantmentLevel (enchantment, enchantments) {
+    for (const e of enchantments) {
+      if (e.id.includes(enchantment)) {
+        return e.lvl
+      }
     }
-    if (notOnGround) time *= 5
+    return -1
+  }
+
+  // http://minecraft.gamepedia.com/Breaking#Calculation
+  Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
+    if (creative) return 0
+
+    const canHarvest = this.canHarvest(heldItemType)
+    const materialToolMultipliers = toolMultipliers[this.material]
+    const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
+
+    let time = this.hardness * 1000 // convert to ms
+    if (canHarvest) {
+      time *= 1.5
+    } else {
+      time *= 5
+    }
+
+    let speedMultiplier = 1
+    if (isBestTool) {
+      speedMultiplier = materialToolMultipliers[heldItemType]
+      const efficiencyLevel = enchantmentLevel('efficiency', enchantments)
+      if (efficiencyLevel >= 0 && canHarvest) {
+        speedMultiplier += efficiencyLevel * efficiencyLevel + 1
+      }
+      const hasteLevel = effectLevel('Haste', effects)
+      if (hasteLevel >= 0) {
+        speedMultiplier *= 1 + (0.2 * hasteLevel)
+      }
+      const miningFatigueLevel = effectLevel('MiningFatigue', effects)
+      if (miningFatigueLevel >= 0) {
+        speedMultiplier /= Math.pow(3, miningFatigueLevel)
+      }
+    }
+    time /= speedMultiplier
+
     if (inWater) time *= 5
+    if (notOnGround) time *= 5
+
+    // The total time to break a block is always a multiple of 1 game tick;
+    // any remainder is rounded up to the next tick.
+    time = Math.ceil(time / 50) * 50
+
     return time
   }
+
   return Block
 }
