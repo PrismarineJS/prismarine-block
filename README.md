@@ -1,6 +1,6 @@
 # prismarine-block
 [![NPM version](https://img.shields.io/npm/v/prismarine-block.svg)](http://npmjs.com/package/prismarine-block)
-[![Build Status](https://circleci.com/gh/PrismarineJS/prismarine-block/tree/master.svg?style=shield)](https://circleci.com/gh/PrismarineJS/prismarine-block/tree/master)
+[![Build Status](https://github.com/PrismarineJS/prismarine-block/workflows/CI/badge.svg)](https://github.com/PrismarineJS/prismarine-block/actions?query=workflow%3A%22CI%22)
 
 Represent a minecraft block with its associated data
 
