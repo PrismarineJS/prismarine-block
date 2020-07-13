@@ -40,6 +40,10 @@ Tells you if `heldItemType` is one of the right tool to harvest the block.
 
  * `heldItemType` the id of the held item (or null if nothing is held)
 
+#### block.getProperties()
+
+Parse the block state and return its properties.
+
 #### block.digTime(heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {})
 
 Tells you how long it will take to dig the block, in milliseconds.
