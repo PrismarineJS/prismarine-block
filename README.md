@@ -40,6 +40,10 @@ Tells you if `heldItemType` is one of the right tool to harvest the block.
 
  * `heldItemType` the id of the held item (or null if nothing is held)
 
+#### block.getProperties()
+
+Parse the block state and return its properties.
+
 #### block.digTime(heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {})
 
 Tells you how long it will take to dig the block, in milliseconds.
@@ -105,6 +109,10 @@ The shape of the block according to the physics engine's collision decection. Cu
 
  * `block` - currently, partially solid blocks, such as half-slabs and ladders, are considered entirely solid.
  * `empty` - such as flowers and lava.
+
+#### block.transparent
+
+ Boolean, true if the block texture has some transparency.
 
 #### block.material
 

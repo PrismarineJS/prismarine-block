@@ -84,6 +84,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
         }
       }
       this.boundingBox = blockEnum.boundingBox
+      this.transparent = blockEnum.transparent
       this.diggable = blockEnum.diggable
       this.material = blockEnum.material
       this.harvestTools = blockEnum.harvestTools
@@ -94,8 +95,29 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
       this.shapes = []
       this.hardness = 0
       this.boundingBox = 'empty'
+      this.transparent = true
       this.diggable = false
     }
+  }
+
+  function propValue (state, value) {
+    if (state.type === 'enum') return state.values[value]
+    if (state.type === 'bool') return !value
+    return value
+  }
+
+  Block.prototype.getProperties = function () {
+    const properties = {}
+    const blockEnum = this.stateId === undefined ? blocks[this.type] : blocksByStateId[this.stateId]
+    if (blockEnum && blockEnum.states) {
+      let data = this.metadata
+      for (let i = blockEnum.states.length - 1; i >= 0; i--) {
+        const prop = blockEnum.states[i]
+        properties[prop.name] = propValue(prop, data % prop.num_values)
+        data = Math.floor(data / prop.num_values)
+      }
+    }
+    return properties
   }
 
   Block.prototype.canHarvest = function (heldItemType) {
