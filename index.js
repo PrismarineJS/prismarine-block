@@ -84,6 +84,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
         }
       }
       this.boundingBox = blockEnum.boundingBox
+      this.transparent = blockEnum.transparent
       this.diggable = blockEnum.diggable
       this.material = blockEnum.material
       this.harvestTools = blockEnum.harvestTools
@@ -94,6 +95,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
       this.shapes = []
       this.hardness = 0
       this.boundingBox = 'empty'
+      this.transparent = true
       this.diggable = false
     }
   }

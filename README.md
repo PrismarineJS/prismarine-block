@@ -106,6 +106,10 @@ The shape of the block according to the physics engine's collision decection. Cu
  * `block` - currently, partially solid blocks, such as half-slabs and ladders, are considered entirely solid.
  * `empty` - such as flowers and lava.
 
+#### block.transparent
+
+ Boolean, true if the block texture has some transparency.
+
 #### block.material
 
 This tells what types of tools will be effective against the block. Possible
