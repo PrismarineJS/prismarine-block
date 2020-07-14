@@ -132,6 +132,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.7.1
+
+* fix canHarvest when no harvestTools required (thanks @Garfield100)
+
 ### 1.7.0
 
 * Add getProperties (thanks @Karang)
