@@ -121,6 +121,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
   }
 
   Block.prototype.canHarvest = function (heldItemType) {
+    if(!this.harvestTools){return true};
     return heldItemType && this.harvestTools && this.harvestTools[heldItemType]
   }
 
