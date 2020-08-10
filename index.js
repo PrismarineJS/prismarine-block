@@ -102,7 +102,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
 
   function propValue (state, value) {
     if (state.type === 'enum') return state.values[value]
-    if (state.type === 'bool') return !value
+    if (state.type === 'bool') return !!value
     return value
   }
 
