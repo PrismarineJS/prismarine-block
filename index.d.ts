@@ -4,6 +4,16 @@
 import {Vec3} from 'vec3';
 import {Biome} from 'prismarine-biome';
 
+interface Effect {
+  id: number;
+  amplifier: number;
+  duration: number;
+}
+
+interface Enchantment {
+  level: number;
+}
+
 declare class Block {
     constructor(type: number, biomeId: number, metadata: number, stateId?: number);
 
@@ -26,7 +36,7 @@ declare class Block {
     painting?: object;
 
     canHarvest(heldItemType: number | null): boolean;
-    digTime(heldItemType: number | null, creative: boolean, inWater: boolean, notOnGround: boolean): number;
+    digTime(heldItemType: number | null, creative: boolean, inWater: boolean, notOnGround: boolean, enchantments?: Enchantment[], effects?: Effect[]): number;
     fromStateId(stateId: number, biomeId: number): Block;
 }
 
