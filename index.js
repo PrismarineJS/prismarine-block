@@ -1,4 +1,5 @@
 module.exports = loader
+module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4']
 
 function loader (mcVersion) {
   const mcData = require('minecraft-data')(mcVersion)
@@ -73,7 +74,11 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
       this.displayName = blockEnum.displayName
       this.shapes = blockEnum.shapes
       if ('stateShapes' in blockEnum) {
-        this.shapes = blockEnum.stateShapes[this.metadata]
+        if (blockEnum.stateShapes[this.metadata] !== undefined) {
+          this.shapes = blockEnum.stateShapes[this.metadata]
+        } else {
+          this.missingStateShape = true
+        }
       } else if ('variations' in blockEnum) {
         const variations = blockEnum.variations
         for (const i in variations) {
