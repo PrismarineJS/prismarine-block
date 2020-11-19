@@ -132,6 +132,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.7.2
+
+* add testing for shapes, make it more robust to missing data
+
 ### 1.7.1
 
 * fix canHarvest when no harvestTools required (thanks @Garfield100)
