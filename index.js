@@ -131,7 +131,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
   }
 
   function effectLevel (effect, effects) {
-    const e = effects[effectsByName[effect]]
+    const e = effects[effectsByName[effect].id]
     return e ? e.amplifier : -1
   }
 
