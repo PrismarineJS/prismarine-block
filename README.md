@@ -132,6 +132,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.7.3
+
+* Fix effectLevel not working in digTime. (@Naomi-alt)
+
 ### 1.7.2
 
 * add testing for shapes, make it more robust to missing data
