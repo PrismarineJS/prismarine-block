@@ -137,7 +137,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
 
   function enchantmentLevel (enchantment, enchantments) {
     for (const e of enchantments) {
-      if (e.id.includes(enchantment)) {
+      if (typeof enchantment === 'string' ? e.id.includes(enchantment) : e.id === enchantment) {
         return e.lvl
       }
     }
@@ -145,7 +145,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
   }
 
   // http://minecraft.gamepedia.com/Breaking#Calculation
-  Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
+  Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}, version) {
     if (creative) return 0
 
     const canHarvest = this.canHarvest(heldItemType)
@@ -162,7 +162,8 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     let speedMultiplier = 1
     if (isBestTool) {
       speedMultiplier = materialToolMultipliers[heldItemType]
-      const efficiencyLevel = enchantmentLevel('efficiency', enchantments)
+      var enchant = parseFloat(version) >= 1.13 ? 'efficiency' : 32
+      const efficiencyLevel = enchantmentLevel(enchant, enchantments)
       if (efficiencyLevel >= 0 && canHarvest) {
         speedMultiplier += efficiencyLevel * efficiencyLevel + 1
       }
