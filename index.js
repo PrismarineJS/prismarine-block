@@ -137,7 +137,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
 
   function enchantmentLevel (enchantment, enchantments) {
     for (const e of enchantments) {
-      if (e.id.includes(enchantment)) {
+      if (typeof enchantment === 'string' ? e.id.includes(enchantment) : e.id === enchantment) {
         return e.lvl
       }
     }
@@ -162,7 +162,8 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     let speedMultiplier = 1
     if (isBestTool) {
       speedMultiplier = materialToolMultipliers[heldItemType]
-      const efficiencyLevel = enchantmentLevel('efficiency', enchantments)
+      var enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
+      const efficiencyLevel = enchantmentLevel(enchant, enchantments)
       if (efficiencyLevel >= 0 && canHarvest) {
         speedMultiplier += efficiencyLevel * efficiencyLevel + 1
       }
