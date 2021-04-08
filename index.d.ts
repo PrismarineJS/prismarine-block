@@ -38,6 +38,7 @@ declare class Block {
     canHarvest(heldItemType: number | null): boolean;
     digTime(heldItemType: number | null, creative: boolean, inWater: boolean, notOnGround: boolean, enchantments?: Enchantment[], effects?: Effect[]): number;
     fromStateId(stateId: number, biomeId: number): Block;
+    getProperties() : { [key: string]: string | number }
 }
 
 export declare function loader(mcVersion: string): typeof Block;
