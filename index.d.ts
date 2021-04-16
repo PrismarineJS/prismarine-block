@@ -78,7 +78,7 @@ declare class Block {
     boundingBox: string;
 
     /**
-     * Boolean, true if the block texture has some transparency.
+     * If the block texture has some transparency.
      */
     transparent: boolean;
 
@@ -117,7 +117,12 @@ declare class Block {
      * - name
      * - direction (direction vector telling how the painting is facing)
      */
-    painting?: object;
+    painting?: {
+        id: number,
+        position: Vec3,
+        name: string,
+        direction: Vec3
+    };
 
     /**
      * Tells you if heldItemType is one of the right tool to harvest the block.
