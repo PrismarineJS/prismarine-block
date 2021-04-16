@@ -32,15 +32,31 @@ declare class Block {
     metadata: number;
 
     light: number;
+
     skyLight: number;
 
     /**
      * A biome instance. See https://github.com/prismarinejs/prismarine-biome#api.
      */
     biome: Biome;
+
+    /**
+     * Position of the block
+     */
     position: Vec3;
+
     stateId?: number;
+
+    /**
+     * Minecraft Id (string) of the block
+     * @example diamond_ore
+     */
     name: string;
+
+    /**
+     * Display Name of the block
+     * @example Stone
+     */
     displayName: string;
 
     /**
@@ -51,6 +67,7 @@ declare class Block {
     shapes: Array<Array<number>>
 
     hardness: number;
+
     /**
      * The shape of the block according to the physics engine's collision decection. Currently one of:
      * - block - currently, partially solid blocks, such as half-slabs and ladders, are considered entirely solid.
@@ -90,6 +107,7 @@ declare class Block {
      * If the block is a sign, contains the sign text.
      */
     signText?: string;
+
     /**
      * If the block is a painting, contains information about the painting.
      * - id
@@ -98,8 +116,6 @@ declare class Block {
      * - direction (direction vector telling how the painting is facing)
      */
     painting?: object;
-
-    fromStateId(stateId: number, biomeId: number): Block;
 
     /**
      * Tells you if heldItemType is one of the right tool to harvest the block.
