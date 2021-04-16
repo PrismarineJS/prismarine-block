@@ -20,14 +20,15 @@ declare class Block {
      * @param type is the block numerical id
      * @param biomeId is the biome numerical id
      * @param metadata is the metadata numerical value
-     * @param stateId ???
+     * @param stateId the state of the block, same as metadata in newer versions
      */
     constructor(type: number, biomeId: number, metadata: number, stateId?: number);
 
     type: number;
 
     /**
-     * Number which represents different things depending on the block. See http://www.minecraftwiki.net/wiki/Data_values#Data
+     * Number which represents different things depending on the block.
+     * @see http://www.minecraftwiki.net/wiki/Data_values#Data
      */
     metadata: number;
 
@@ -36,7 +37,8 @@ declare class Block {
     skyLight: number;
 
     /**
-     * A biome instance. See https://github.com/prismarinejs/prismarine-biome#api.
+     * A biome instance.
+     * @see https://github.com/prismarinejs/prismarine-biome#api.
      */
     biome: Biome;
 
@@ -89,7 +91,7 @@ declare class Block {
      * This tells what types of tools will be effective against the block.
      * Possible values are: null, rock, wood, plant, melon, leaves, dirt, web, and wool.
      *
-     * See http://www.minecraftwiki.net/wiki/Digging and the toolMultipliers variable at the top of lib/plugins/digging.js for more info.
+     * @see http://www.minecraftwiki.net/wiki/Digging and the toolMultipliers variable at the top of lib/plugins/digging.js for more info.
      */
     material?: string | null;
 
