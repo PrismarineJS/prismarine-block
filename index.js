@@ -152,13 +152,6 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     const materialToolMultipliers = toolMultipliers[this.material]
     const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
 
-    let time = this.hardness * 1000 // convert to ms
-    if (canHarvest) {
-      time *= 1.5
-    } else {
-      time *= 5
-    }
-
     let speedMultiplier = 1
     if (isBestTool) {
       speedMultiplier = materialToolMultipliers[heldItemType]
@@ -176,6 +169,19 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
         speedMultiplier /= Math.pow(3, miningFatigueLevel)
       }
     }
+    let time = this.hardness * 1000 // convert to ms
+    let damage = speedMultiplier / this.hardness
+
+    if (canHarvest) {
+      time *= 1.5
+      damage /= 30
+    } else {
+      time *= 5
+      damage /= 100
+    }
+
+    if (damage > 1) return 0
+    
     time /= speedMultiplier
 
     if (inWater) time *= 5
