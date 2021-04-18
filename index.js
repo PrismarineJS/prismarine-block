@@ -155,7 +155,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     let speedMultiplier = 1
     if (isBestTool) {
       speedMultiplier = materialToolMultipliers[heldItemType]
-      let enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
+      const enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
       const efficiencyLevel = enchantmentLevel(enchant, enchantments)
       if (efficiencyLevel >= 0 && canHarvest) {
         speedMultiplier += efficiencyLevel * efficiencyLevel + 1
@@ -181,9 +181,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     }
 
     if (damage > 1) return 0
-    
     time /= speedMultiplier
-    
     if (inWater) time *= 5
     if (notOnGround) time *= 5
 
