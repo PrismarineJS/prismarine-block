@@ -28,9 +28,9 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     if (state.type === 'enum') {
       return state.values.indexOf(value)
     }
-    if (value === 'true') return 0
-    if (value === 'false') return 1
-    return parseInt(value, 10)
+    if (value === true) return 0
+    if (value === false) return 1
+    return value
   }
 
   function getStateValue (states, name, value) {
@@ -55,6 +55,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     let data = 0
     for (const [key, value] of Object.entries(properties)) {
       data += getStateValue(block.states, key, value)
+      console.log(`${key}: ${value}, ${data}`)
     }
     return new Block(undefined, biomeId, 0, block.minStateId + data)
   }
