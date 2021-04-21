@@ -147,6 +147,14 @@ declare class Block {
     digTime(heldItemType: number | null, creative: boolean, inWater: boolean, notOnGround: boolean, enchantments?: Enchantment[], effects?: Effect[]): number;
 
     fromStateId(stateId: number, biomeId: number): Block;
+    
+    /**
+     * Creates a block object from a given type id and set of block state properties.
+     * @param typeId - The block type ID
+     * @param properties - A dictionary of block states to build from.
+     * @param biomeId - The biome this block is in.
+     */
+    fromProperties(typeId: number, properties: { [key: string]: string | number }, biomeId: number): Block;
 }
 
 export declare function loader(mcVersion: string): typeof Block;
