@@ -24,6 +24,27 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     }
   }
 
+  function parseValue (value, state) {
+    if (state.type === 'enum') {
+      return state.values.indexOf(value)
+    }
+    if (value === 'true') return 0
+    if (value === 'false') return 1
+    return parseInt(value, 10)
+  }
+
+  function getStateValue (states, name, value) {
+    let offset = 1
+    for (let i = states.length - 1; i >= 0; i--) {
+      const state = states[i]
+      if (state.name === name) {
+        return offset * parseValue(value, state)
+      }
+      offset *= state.num_values
+    }
+    return 0
+  }
+
   Block.fromProperties = function (typeId, properties, biomeId) {
     const block = blocks[typeId]
 
@@ -35,7 +56,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     for (const [key, value] of Object.entries(properties)) {
       data += getStateValue(block.states, key, value)
     }
-    return Block.fromStateId(block.minStateId + data, biomeId)
+    return new Block(undefined, biomeId, 0, block.minStateId + data)
   }
 
   if (shapes) {
@@ -64,27 +85,6 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
         }
       }
     }
-  }
-
-  function parseValue (value, state) {
-    if (state.type === 'enum') {
-      return state.values.indexOf(value)
-    }
-    if (value === 'true') return 0
-    if (value === 'false') return 1
-    return parseInt(value, 10)
-  }
-
-  function getStateValue (states, name, value) {
-    let offset = 1
-    for (let i = states.length - 1; i >= 0; i--) {
-      const state = states[i]
-      if (state.name === name) {
-        return offset * parseValue(value, state)
-      }
-      offset *= state.num_values
-    }
-    return 0
   }
 
   function Block (type, biomeId, metadata, stateId) {
