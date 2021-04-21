@@ -35,7 +35,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     for (const [key, value] of Object.entries(properties)) {
       data += getStateValue(block.states, key, value)
     }
-    return block.minStateId + data
+    return Block.fromStateId(block.minStateId + data, biomeId)
   }
 
   if (shapes) {
