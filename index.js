@@ -32,7 +32,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     }
 
     let data = 0
-    for (const [key, value] of properties) {
+    for (const [key, value] of Object.entries(properties)) {
       data += getStateValue(block.states, key, value)
     }
     return block.minStateId + data
