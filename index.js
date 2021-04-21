@@ -25,11 +25,12 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
   }
 
   Block.fromProperties = function (typeId, properties, biomeId) {
+    const block = blocks[typeId]
+
     if (block.minStateId == null) {
       throw new Error('Block properties not available in current Minecraft version!')
     }
 
-    const block = blocks[typeId]
     let data = 0
     for (const [key, value] of properties) {
       data += getStateValue(block.states, key, value)
@@ -64,7 +65,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
       }
     }
   }
-  
+
   function parseValue (value, state) {
     if (state.type === 'enum') {
       return state.values.indexOf(value)
@@ -196,7 +197,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     let speedMultiplier = 1
     if (isBestTool) {
       speedMultiplier = materialToolMultipliers[heldItemType]
-      var enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
+      const enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
       const efficiencyLevel = enchantmentLevel(enchant, enchantments)
       if (efficiencyLevel >= 0 && canHarvest) {
         speedMultiplier += efficiencyLevel * efficiencyLevel + 1
