@@ -24,6 +24,42 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     }
   }
 
+  function parseValue (value, state) {
+    if (state.type === 'enum') {
+      return state.values.indexOf(value)
+    }
+    if (value === true) return 0
+    if (value === false) return 1
+    return value
+  }
+
+  function getStateValue (states, name, value) {
+    let offset = 1
+    for (let i = states.length - 1; i >= 0; i--) {
+      const state = states[i]
+      if (state.name === name) {
+        return offset * parseValue(value, state)
+      }
+      offset *= state.num_values
+    }
+    return 0
+  }
+
+  Block.fromProperties = function (typeId, properties, biomeId) {
+    const block = blocks[typeId]
+
+    if (block.minStateId == null) {
+      throw new Error('Block properties not available in current Minecraft version!')
+    }
+
+    let data = 0
+    for (const [key, value] of Object.entries(properties)) {
+      data += getStateValue(block.states, key, value)
+      console.log(`${key}: ${value}, ${data}`)
+    }
+    return new Block(undefined, biomeId, 0, block.minStateId + data)
+  }
+
   if (shapes) {
     // Prepare block shapes
     for (const id in blocks) {
@@ -152,17 +188,10 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     const materialToolMultipliers = toolMultipliers[this.material]
     const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
 
-    let time = this.hardness * 1000 // convert to ms
-    if (canHarvest) {
-      time *= 1.5
-    } else {
-      time *= 5
-    }
-
     let speedMultiplier = 1
     if (isBestTool) {
       speedMultiplier = materialToolMultipliers[heldItemType]
-      var enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
+      const enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
       const efficiencyLevel = enchantmentLevel(enchant, enchantments)
       if (efficiencyLevel >= 0 && canHarvest) {
         speedMultiplier += efficiencyLevel * efficiencyLevel + 1
@@ -176,8 +205,19 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
         speedMultiplier /= Math.pow(3, miningFatigueLevel)
       }
     }
-    time /= speedMultiplier
+    let time = this.hardness * 1000 // convert to ms
+    let damage = speedMultiplier / this.hardness
 
+    if (canHarvest) {
+      time *= 1.5
+      damage /= 30
+    } else {
+      time *= 5
+      damage /= 100
+    }
+
+    if (damage > 1) return 0
+    time /= speedMultiplier
     if (inWater) time *= 5
     if (notOnGround) time *= 5
 
