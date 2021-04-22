@@ -133,7 +133,7 @@ declare class Block {
     /**
      * Parse the block state and return its properties.
      */
-    getProperties(): object;
+    getProperties() : { [key: string]: string | number }
 
     /**
      * Tells you how long it will take to dig the block, in milliseconds.
@@ -147,7 +147,7 @@ declare class Block {
     digTime(heldItemType: number | null, creative: boolean, inWater: boolean, notOnGround: boolean, enchantments?: Enchantment[], effects?: Effect[]): number;
 
     fromStateId(stateId: number, biomeId: number): Block;
-    
+
     /**
      * Creates a block object from a given type id and set of block state properties.
      * @param typeId - The block type ID
