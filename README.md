@@ -132,6 +132,12 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.9.0
+
+* added `block.getProperties()` type definitions.
+* added instant breaking support
+* added `Block.fromProperties()` constructor.
+
 ### 1.8.0
 
 * Efficiency fix on versions below 1.13
