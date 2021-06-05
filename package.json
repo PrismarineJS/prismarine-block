@@ -20,7 +20,7 @@
     "minecraft-data": "^2.62.1"
   },
   "devDependencies": {
-    "jest": "^26.1.0",
+    "jest": "^27.0.4",
     "minecraft-data": "^2.62.1",
     "standard": "^16.0.1",
     "vec3": "^0.1.4"
