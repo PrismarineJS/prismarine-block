@@ -52,7 +52,7 @@ Tells you how long it will take to dig the block, in milliseconds.
  * `creative` game in creative
  * `inWater` the bot is in water
  * `notOnGround` the bot is not on the ground
- * `enchantments` list of enchantments from the held item (from simplified nbt data)
+ * `enchantments` list of enchantments from the held item (from simplified nbt data) **AND** equipped armor - Aqua Affinity enchantment on helmet also affects breaking speed
  * `effects` effects on the bot (bot.entity.effects)
 
 #### block.position

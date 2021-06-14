@@ -9,15 +9,14 @@ function loader (mcVersion) {
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
-    majorVersion: mcData.version.majorVersion,
+    protocolVersion: mcData.version.version,
     effectsByName: mcData.effectsByName
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, majorVersion, effectsByName }) {
+function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, protocolVersion, effectsByName }) {
   Block.fromStateId = function (stateId, biomeId) {
-    if (majorVersion === '1.8' || majorVersion === '1.9' || majorVersion === '1.10' || majorVersion === '1.11' ||
-    majorVersion === '1.12') {
+    if (protocolVersion <= 340) {
       return new Block(stateId >> 4, biomeId, stateId & 15)
     } else {
       return new Block(undefined, biomeId, 0, stateId)
@@ -28,9 +27,12 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     if (state.type === 'enum') {
       return state.values.indexOf(value)
     }
-    if (value === true) return 0
-    if (value === false) return 1
-    return value
+    if (state.type === 'bool') {
+      if (value === true) return 0
+      if (value === false) return 1
+    }
+    // Assume by-name mapping for unknown properties
+    return state.values.indexOf(value.toString())
   }
 
   function getStateValue (states, name, value) {
@@ -166,66 +168,130 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, ma
     return heldItemType && this.harvestTools && this.harvestTools[heldItemType]
   }
 
-  function effectLevel (effect, effects) {
-    const e = effects[effectsByName[effect].id]
+  // Determine data required to actually compute dig times that is version-dependent
+  let blockDigTimeData
+
+  // 1.17+: effect names have been fixed to actually match their registry names
+  if (protocolVersion >= 755) {
+    blockDigTimeData = {
+      enchantmentKey: 'efficiency',
+      hasteEffectName: 'haste',
+      miningFatigueEffectName: 'mining_fatigue',
+      conduitPowerEffectName: 'conduit_power',
+      aquaAffinityEnchantmentName: 'aqua_affinity'
+    }
+  } else {
+    // 1.13+: enchantments are no longer stored by IDs, but rather by registry names
+    const isPost113 = protocolVersion >= 393
+    blockDigTimeData = {
+      enchantmentKey: isPost113 ? 'efficiency' : 32,
+      hasteEffectName: 'Haste',
+      miningFatigueEffectName: 'MiningFatigue',
+      conduitPowerEffectName: 'ConduitPower',
+      aquaAffinityEnchantmentName: 'AquaAffinity'
+    }
+  }
+
+  function getEffectLevel (effectName, effects) {
+    const e = effects[effectsByName[effectName].id]
     return e ? e.amplifier : -1
   }
 
-  function enchantmentLevel (enchantment, enchantments) {
+  function getEnchantmentLevel (enchantmentKey, enchantments) {
     for (const e of enchantments) {
-      if (typeof enchantment === 'string' ? e.id.includes(enchantment) : e.id === enchantment) {
+      if (typeof enchantmentKey === 'string' ? e.id.includes(enchantmentKey) : e.id === enchantmentKey) {
         return e.lvl
       }
     }
     return -1
   }
 
-  // http://minecraft.gamepedia.com/Breaking#Calculation
+  function getMiningFatigueMultiplier (effectLevel) {
+    switch (effectLevel) {
+      case 0: return 0.0
+      case 1: return 0.3
+      case 2: return 0.09
+      case 3: return 0.0027
+      default: return 8.1E-4
+    }
+  }
+
+  // Reworked to completely match Minecraft 1.7 block breaking code
+  // This has not introduced any considerable changes though, so for older version behaviour should still remain consistent
   Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
     if (creative) return 0
 
-    const canHarvest = this.canHarvest(heldItemType)
     const materialToolMultipliers = toolMultipliers[this.material]
     const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
 
-    let speedMultiplier = 1
+    // Compute breaking speed multiplier
+    let blockBreakingSpeed = 1
+
     if (isBestTool) {
-      speedMultiplier = materialToolMultipliers[heldItemType]
-      const enchant = parseFloat(majorVersion) >= 1.13 ? 'efficiency' : 32
-      const efficiencyLevel = enchantmentLevel(enchant, enchantments)
-      if (efficiencyLevel >= 0 && canHarvest) {
-        speedMultiplier += efficiencyLevel * efficiencyLevel + 1
-      }
-      const hasteLevel = effectLevel('Haste', effects)
-      if (hasteLevel >= 0) {
-        speedMultiplier *= 1 + (0.2 * hasteLevel)
-      }
-      const miningFatigueLevel = effectLevel('MiningFatigue', effects)
-      if (miningFatigueLevel >= 0) {
-        speedMultiplier /= Math.pow(3, miningFatigueLevel)
-      }
-    }
-    let time = this.hardness * 1000 // convert to ms
-    let damage = speedMultiplier / this.hardness
-
-    if (canHarvest) {
-      time *= 1.5
-      damage /= 30
-    } else {
-      time *= 5
-      damage /= 100
+      blockBreakingSpeed = materialToolMultipliers[heldItemType]
     }
 
-    if (damage > 1) return 0
-    time /= speedMultiplier
-    if (inWater) time *= 5
-    if (notOnGround) time *= 5
+    // Efficiency is applied if tools speed multiplier is more than 1.0
+    const efficiencyLevel = getEnchantmentLevel(blockDigTimeData.enchantmentKey, enchantments)
+    if (efficiencyLevel >= 0 && blockBreakingSpeed > 1.0) {
+      blockBreakingSpeed += efficiencyLevel * efficiencyLevel + 1
+    }
 
-    // The total time to break a block is always a multiple of 1 game tick;
-    // any remainder is rounded up to the next tick.
-    time = Math.ceil(time / 50) * 50
+    // Haste is always considered when effect is present, and when both
+    // Conduit Power and Haste are present, highest level is considered
+    const hasteLevel = Math.max(
+      getEffectLevel(blockDigTimeData.hasteEffectName, effects),
+      getEffectLevel(blockDigTimeData.conduitPowerEffectName, effects))
 
-    return time
+    if (hasteLevel > 0) {
+      blockBreakingSpeed *= 1 + (0.2 * hasteLevel)
+    }
+
+    // Mining fatigue is applied afterwards, but multiplier only decreases up to level 4
+    const miningFatigueLevel = getEffectLevel(blockDigTimeData.miningFatigueEffectName, effects)
+
+    if (miningFatigueLevel >= 0) {
+      blockBreakingSpeed *= getMiningFatigueMultiplier(miningFatigueLevel)
+    }
+
+    // Apply 5x breaking speed de-buff if we are submerged in water and do not have aqua affinity
+    const aquaAffinityLevel = getEnchantmentLevel(blockDigTimeData.miningFatigueEffectName, effects)
+
+    if (inWater && aquaAffinityLevel === 0) {
+      blockBreakingSpeed /= 5.0
+    }
+
+    // We always get 5x breaking speed de-buff if we are not on the ground
+    if (notOnGround) {
+      blockBreakingSpeed /= 5.0
+    }
+
+    // Compute block breaking delta (breaking progress applied in a single tick)
+    const blockHardness = this.hardness
+    const matchingToolMultiplier = this.canHarvest(heldItemType) ? 30.0 : 100.0
+
+    let blockBreakingDelta = blockBreakingSpeed / blockHardness / matchingToolMultiplier
+
+    // Delta will always be zero if block has -1.0 durability
+    if (blockHardness === -1.0) {
+      blockBreakingDelta = 0.0
+    }
+
+    // We will never be capable of breaking block if delta is zero, so abort now and return infinity
+    if (blockBreakingDelta === 0.0) {
+      return Infinity
+    }
+
+    // If breaking delta is more than 1.0 per tick, the block is broken instantly, so return 0
+    if (blockBreakingDelta >= 1.0) {
+      return 0
+    }
+
+    // Determine how many ticks breaking will take, then convert to millis and return result
+    // We round ticks up because if progress is below 1.0, it will be finished next tick
+
+    const ticksToBreakBlock = Math.ceil(1.0 / blockBreakingDelta)
+    return ticksToBreakBlock * 50
   }
 
   return Block
