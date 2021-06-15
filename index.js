@@ -9,17 +9,18 @@ function loader (mcVersion) {
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
-    protocolVersion: mcData.version.version,
+    isVersionNewerOrEqualTo: mcData.isNewerOrEqualTo,
     effectsByName: mcData.effectsByName
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, protocolVersion, effectsByName }) {
+function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, isVersionNewerOrEqualTo, effectsByName }) {
   Block.fromStateId = function (stateId, biomeId) {
-    if (protocolVersion <= 340) {
-      return new Block(stateId >> 4, biomeId, stateId & 15)
-    } else {
+    // 1.13+: metadata is completely removed and only block state IDs are used
+    if (isVersionNewerOrEqualTo('1.13')) {
       return new Block(undefined, biomeId, 0, stateId)
+    } else {
+      return new Block(stateId >> 4, biomeId, stateId & 15)
     }
   }
 
@@ -172,7 +173,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, pr
   let blockDigTimeData
 
   // 1.17+: effect names have been fixed to actually match their registry names
-  if (protocolVersion >= 755) {
+  if (isVersionNewerOrEqualTo('1.17')) {
     blockDigTimeData = {
       enchantmentKey: 'efficiency',
       hasteEffectName: 'haste',
@@ -182,7 +183,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, pr
     }
   } else {
     // 1.13+: enchantments are no longer stored by IDs, but rather by registry names
-    const isPost113 = protocolVersion >= 393
+    const isPost113 = isVersionNewerOrEqualTo('1.13')
     blockDigTimeData = {
       enchantmentKey: isPost113 ? 'efficiency' : 32,
       hasteEffectName: 'Haste',
@@ -216,8 +217,9 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, pr
     }
   }
 
-  // Reworked to completely match Minecraft 1.7 block breaking code
-  // This has not introduced any considerable changes though, so for older version behaviour should still remain consistent
+  // http://minecraft.gamepedia.com/Breaking#Calculation
+  // for more concrete information, look up following Minecraft methods (assuming yarn mappings):
+  // AbstractBlock#calcBlockBreakingDelta, PlayerEntity#getBlockBreakingSpeed, PlayerEntity#canHarvest
   Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
     if (creative) return 0
 
