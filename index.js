@@ -9,7 +9,7 @@ function loader (mcVersion) {
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
-    isVersionNewerOrEqualTo: mcData.isNewerOrEqualTo,
+    isVersionNewerOrEqualTo: mcData.isNewerOrEqualTo.bind(mcData),
     effectsByName: mcData.effectsByName
   })
 }
