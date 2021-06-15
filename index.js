@@ -175,21 +175,21 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
   // 1.17+: effect names have been fixed to actually match their registry names
   if (isVersionNewerOrEqualTo('1.17')) {
     blockDigTimeData = {
-      enchantmentKey: 'efficiency',
+      efficiencyEnchantmentKey: 'efficiency',
       hasteEffectName: 'haste',
       miningFatigueEffectName: 'mining_fatigue',
       conduitPowerEffectName: 'conduit_power',
-      aquaAffinityEnchantmentName: 'aqua_affinity'
+      aquaAffinityEnchantmentKey: 'aqua_affinity'
     }
   } else {
     // 1.13+: enchantments are no longer stored by IDs, but rather by registry names
     const isPost113 = isVersionNewerOrEqualTo('1.13')
     blockDigTimeData = {
-      enchantmentKey: isPost113 ? 'efficiency' : 32,
+      efficiencyEnchantmentKey: isPost113 ? 'efficiency' : 32,
       hasteEffectName: 'Haste',
       miningFatigueEffectName: 'MiningFatigue',
       conduitPowerEffectName: 'ConduitPower',
-      aquaAffinityEnchantmentName: 'AquaAffinity'
+      aquaAffinityEnchantmentKey: isPost113 ? 'aqua_affinity' : 6
     }
   }
 
@@ -206,12 +206,13 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
   }
 
   function getEnchantmentLevel (enchantmentKey, enchantments) {
-    for (const e of enchantments) {
-      if (typeof enchantmentKey === 'string' ? e.id.includes(enchantmentKey) : e.id === enchantmentKey) {
-        return e.lvl
+    const isStringKey = typeof enchantmentKey === 'string'
+    for (const enchInfo of enchantments) {
+      if (isStringKey ? enchInfo.id.includes(enchantmentKey) : enchInfo.id === enchantmentKey) {
+        return enchInfo.lvl
       }
     }
-    return -1
+    return 0
   }
 
   function getMiningFatigueMultiplier (effectLevel) {
@@ -241,8 +242,8 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
     }
 
     // Efficiency is applied if tools speed multiplier is more than 1.0
-    const efficiencyLevel = getEnchantmentLevel(blockDigTimeData.enchantmentKey, enchantments)
-    if (efficiencyLevel >= 0 && blockBreakingSpeed > 1.0) {
+    const efficiencyLevel = getEnchantmentLevel(blockDigTimeData.efficiencyEnchantmentKey, enchantments)
+    if (efficiencyLevel > 0 && blockBreakingSpeed > 1.0) {
       blockBreakingSpeed += efficiencyLevel * efficiencyLevel + 1
     }
 
@@ -264,7 +265,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
     }
 
     // Apply 5x breaking speed de-buff if we are submerged in water and do not have aqua affinity
-    const aquaAffinityLevel = getEnchantmentLevel(blockDigTimeData.miningFatigueEffectName, effects)
+    const aquaAffinityLevel = getEnchantmentLevel(blockDigTimeData.aquaAffinityEnchantmentKey, effects)
 
     if (inWater && aquaAffinityLevel === 0) {
       blockBreakingSpeed /= 5.0
