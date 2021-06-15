@@ -194,8 +194,15 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
   }
 
   function getEffectLevel (effectName, effects) {
-    const e = effects[effectsByName[effectName].id]
-    return e ? e.amplifier : -1
+    const effectDescriptor = effectsByName[effectName]
+    if (!effectDescriptor) {
+      return 0
+    }
+    const effectInfo = effects[effectDescriptor.id]
+    if (!effectInfo) {
+      return 0
+    }
+    return effectInfo.amplifier + 1
   }
 
   function getEnchantmentLevel (enchantmentKey, enchantments) {
