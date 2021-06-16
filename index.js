@@ -220,7 +220,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
 
   function getMiningFatigueMultiplier (effectLevel) {
     switch (effectLevel) {
-      case 0: return 0.0
+      case 0: return 1.0
       case 1: return 0.3
       case 2: return 0.09
       case 3: return 0.0027
@@ -263,12 +263,12 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
     // Mining fatigue is applied afterwards, but multiplier only decreases up to level 4
     const miningFatigueLevel = getEffectLevel(statusEffectNames.miningFatigueEffectName, effects)
 
-    if (miningFatigueLevel >= 0) {
+    if (miningFatigueLevel > 0) {
       blockBreakingSpeed *= getMiningFatigueMultiplier(miningFatigueLevel)
     }
 
     // Apply 5x breaking speed de-buff if we are submerged in water and do not have aqua affinity
-    const aquaAffinityLevel = getEnchantmentLevel('aqua_affinity', effects)
+    const aquaAffinityLevel = getEnchantmentLevel('aqua_affinity', enchantments)
 
     if (inWater && aquaAffinityLevel === 0) {
       blockBreakingSpeed /= 5.0
