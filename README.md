@@ -132,6 +132,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.10.0
+
+* 1.17.0 support (thanks @Archengius and @the9g)
+
 ### 1.9.0
 
 * added `block.getProperties()` type definitions.
