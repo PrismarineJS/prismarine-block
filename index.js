@@ -6,19 +6,20 @@ function loader (mcVersion) {
   return provider({
     Biome: require('prismarine-biome')(mcVersion),
     blocks: mcData.blocks,
+    blockStates: mcData.blockStates,
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
-    isVersionNewerOrEqualTo: mcData.type === 'pe' ? () => false : mcData.isNewerOrEqualTo.bind(mcData),
+    version: mcData.version,
     effectsByName: mcData.effectsByName,
     enchantmentsByName: mcData.enchantmentsByName
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, isVersionNewerOrEqualTo, effectsByName, enchantmentsByName }) {
+function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultipliers, shapes, version, effectsByName, enchantmentsByName }) {
   Block.fromStateId = function (stateId, biomeId) {
     // 1.13+: metadata is completely removed and only block state IDs are used
-    if (isVersionNewerOrEqualTo('1.13')) {
+    if ((version.type === 'pc' && version['>=']('1.13')) || (version.type === 'bedrock')) {
       return new Block(undefined, biomeId, 0, stateId)
     } else {
       return new Block(stateId >> 4, biomeId, stateId & 15)
@@ -64,7 +65,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
     return new Block(undefined, biomeId, 0, block.minStateId + data)
   }
 
-  if (shapes) {
+  if (version.type === 'pc' && shapes) {
     // Prepare block shapes
     for (const id in blocks) {
       const block = blocks[id]
@@ -127,6 +128,13 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
             this.shapes = variations[i].shapes
           }
         }
+      } else if (version.type === 'bedrock') {
+        // On Bedrock, the block states are stored in their own file, deserialized from NBT. They can simply be
+        // indexed by the state ID without any iteration. The shapes are also indexed as block name + metadata. 
+        // "Metadata" is just the offset of the state ID from the minStateId.
+        const variation = blockStates[stateId]
+        this.displayName = variation.name
+        this.shapes = shapes[variation.name][this.metadata]
       }
       this.boundingBox = blockEnum.boundingBox
       this.transparent = blockEnum.transparent
@@ -174,7 +182,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
   let statusEffectNames
 
   // 1.17+: effect names have been fixed to actually match their registry names
-  if (isVersionNewerOrEqualTo('1.17')) {
+  if (version['>=']('1.17')) {
     statusEffectNames = {
       hasteEffectName: 'haste',
       miningFatigueEffectName: 'mining_fatigue',
