@@ -9,7 +9,7 @@ function loader (mcVersion) {
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
-    isVersionNewerOrEqualTo: mcData.type === 'pe' ? () => false : mcData.isNewerOrEqualTo.bind(mcData),
+    isVersionNewerOrEqualTo: mcData.type === 'bedrock' ? () => false : mcData.isNewerOrEqualTo.bind(mcData),
     effectsByName: mcData.effectsByName,
     enchantmentsByName: mcData.enchantmentsByName
   })
