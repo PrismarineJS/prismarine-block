@@ -7,17 +7,17 @@ Represent a minecraft block with its associated data
 ## Usage
 
 ```js
-const Block=require("prismarine-block")("1.8");
+const Block = require('prismarine-block')('1.8')
 
-const stoneBlock=new Block(1,1,0);
+const stoneBlock = new Block(1, 1, 0)
 
-console.log(stoneBlock);
+console.log(stoneBlock)
 
 // can you harvest stone with an iron pickaxe ?
-console.log(stoneBlock.canHarvest(257));
+console.log(stoneBlock.canHarvest(257))
 
 // how many milliseconds does it takes in usual conditions ? (on ground, not in water and not in creative mode)
-console.log(stoneBlock.digTime(257));
+console.log(stoneBlock.digTime(257))
 
 ```
 
@@ -131,6 +131,10 @@ The set of tools that will allow you to harvest the block.
 The blocks or items dropped by that block.
 
 ## History
+
+### 1.10.1
+
+* Fix ternary operator for bedrock name check
 
 ### 1.10.0
 

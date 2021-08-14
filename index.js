@@ -130,7 +130,7 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
         }
       } else if (version.type === 'bedrock') {
         // On Bedrock, the block states are stored in their own file, deserialized from NBT. They can simply be
-        // indexed by the state ID without any iteration. The shapes are also indexed as block name + metadata. 
+        // indexed by the state ID without any iteration. The shapes are also indexed as block name + metadata.
         // "Metadata" is just the offset of the state ID from the minStateId.
         const variation = blockStates[stateId]
         this.displayName = variation.name
