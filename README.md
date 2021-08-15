@@ -132,6 +132,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.10.2
+
+* remove debug code
+
 ### 1.10.1
 
 * Fix ternary operator for bedrock name check
