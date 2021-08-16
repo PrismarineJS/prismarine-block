@@ -1,11 +1,11 @@
 module.exports = loader
-module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4']
+module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4', 'bedrock_1.17.10']
 
 function loader (mcVersion) {
   const mcData = require('minecraft-data')(mcVersion)
   return provider({
     Biome: require('prismarine-biome')(mcVersion),
-    blocks: mcData.blocks,
+    blocks: mcData.version.type === 'pc' ? mcData.blocks : mcData.blockStates,
     blockStates: mcData.blockStates,
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
@@ -65,18 +65,19 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
     return new Block(undefined, biomeId, 0, block.minStateId + data)
   }
 
-  if (version.type === 'pc' && shapes) {
+  if (shapes) {
     // Prepare block shapes
     for (const id in blocks) {
       const block = blocks[id]
       const shapesId = shapes.blocks[block.name]
       block.shapes = (shapesId instanceof Array) ? shapes.shapes[shapesId[0]] : shapes.shapes[shapesId]
-      if ('states' in block) { // post 1.13
+      if (block.states || version.type === 'bedrock') { // post 1.13
         if (shapesId instanceof Array) {
           block.stateShapes = []
           for (const i in shapesId) {
             block.stateShapes.push(shapes.shapes[shapesId[i]])
           }
+          if (version.type === 'bedrock') blocksByStateId[id].stateShapes = block.stateShapes
         }
       } else { // pre 1.13
         if ('variations' in block) {
@@ -89,6 +90,12 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
             }
           }
         }
+      }
+
+      if (!block.shapes && version.type === 'bedrock') {
+        // if no shapes are present for this block (for example, some chemistry stuff we don't have BBs for), assume it's stone
+        block.shapes = shapes.shapes[shapes.blocks.stone[0]]
+        blocksByStateId[id].stateShapes = block.shapes
       }
     }
   }
@@ -114,13 +121,15 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
       this.hardness = blockEnum.hardness
       this.displayName = blockEnum.displayName
       this.shapes = blockEnum.shapes
-      if ('stateShapes' in blockEnum) {
+      if (blockEnum.stateShapes) {
         if (blockEnum.stateShapes[this.metadata] !== undefined) {
           this.shapes = blockEnum.stateShapes[this.metadata]
         } else {
+          // Default to shape 0
+          this.shapes = blockEnum.stateShapes[0]
           this.missingStateShape = true
         }
-      } else if ('variations' in blockEnum) {
+      } else if (blockEnum.variations) {
         const variations = blockEnum.variations
         for (const i in variations) {
           if (variations[i].metadata === metadata) {
@@ -128,13 +137,6 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
             this.shapes = variations[i].shapes
           }
         }
-      } else if (version.type === 'bedrock') {
-        // On Bedrock, the block states are stored in their own file, deserialized from NBT. They can simply be
-        // indexed by the state ID without any iteration. The shapes are also indexed as block name + metadata.
-        // "Metadata" is just the offset of the state ID from the minStateId.
-        const variation = blockStates[stateId]
-        this.displayName = variation.name
-        this.shapes = shapes[variation.name][this.metadata]
       }
       this.boundingBox = blockEnum.boundingBox
       this.transparent = blockEnum.transparent

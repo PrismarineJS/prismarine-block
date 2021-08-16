@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "jest": "^27.0.4",
-    "minecraft-data": "^2.62.1",
+    "minecraft-data": "github:extremeheat/node-minecraft-data#bedrock",
     "standard": "^16.0.1",
     "vec3": "^0.1.4"
   },
