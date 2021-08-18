@@ -5,7 +5,7 @@ function loader (mcVersion) {
   const mcData = require('minecraft-data')(mcVersion)
   return provider({
     Biome: require('prismarine-biome')(mcVersion),
-    blocks: mcData.version.type === 'pc' ? mcData.blocks : mcData.blockStates,
+    blocks: mcData.blocks,
     blockStates: mcData.blockStates,
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
@@ -57,12 +57,19 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
       throw new Error('Block properties not available in current Minecraft version!')
     }
 
-    let data = 0
-    for (const [key, value] of Object.entries(properties)) {
-      data += getStateValue(block.states, key, value)
-      console.log(`${key}: ${value}, ${data}`)
+    if (version.type === 'pc') {
+      let data = 0
+      for (const [key, value] of Object.entries(properties)) {
+        data += getStateValue(block.states, key, value)
+      }
+      return new Block(undefined, biomeId, 0, block.minStateId + data)
+    } else if (version.type === 'bedrock') {
+      for (let stateId = block.minStateId; stateId < block.maxStateId; stateId++) {
+        const state = blockStates[stateId].states
+        if (Object.entries(properties).find(([prop, val]) => state[prop]?.value !== val)) continue
+        return new Block(undefined, biomeId, 0, stateId)
+      }
     }
-    return new Block(undefined, biomeId, 0, block.minStateId + data)
   }
 
   if (shapes) {
@@ -77,7 +84,6 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
           for (const i in shapesId) {
             block.stateShapes.push(shapes.shapes[shapesId[i]])
           }
-          if (version.type === 'bedrock') blocksByStateId[id].stateShapes = block.stateShapes
         }
       } else { // pre 1.13
         if ('variations' in block) {
@@ -95,7 +101,7 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
       if (!block.shapes && version.type === 'bedrock') {
         // if no shapes are present for this block (for example, some chemistry stuff we don't have BBs for), assume it's stone
         block.shapes = shapes.shapes[shapes.blocks.stone[0]]
-        blocksByStateId[id].stateShapes = block.shapes
+        block.stateShapes = block.shapes
       }
     }
   }
@@ -161,18 +167,29 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
     return value
   }
 
-  Block.prototype.getProperties = function () {
-    const properties = {}
-    const blockEnum = this.stateId === undefined ? blocks[this.type] : blocksByStateId[this.stateId]
-    if (blockEnum && blockEnum.states) {
-      let data = this.metadata
-      for (let i = blockEnum.states.length - 1; i >= 0; i--) {
-        const prop = blockEnum.states[i]
-        properties[prop.name] = propValue(prop, data % prop.num_values)
-        data = Math.floor(data / prop.num_values)
+  if (version.type === 'pc') {
+    Block.prototype.getProperties = function () {
+      const properties = {}
+      const blockEnum = this.stateId === undefined ? blocks[this.type] : blocksByStateId[this.stateId]
+      if (blockEnum && blockEnum.states) {
+        let data = this.metadata
+        for (let i = blockEnum.states.length - 1; i >= 0; i--) {
+          const prop = blockEnum.states[i]
+          properties[prop.name] = propValue(prop, data % prop.num_values)
+          data = Math.floor(data / prop.num_values)
+        }
       }
+      return properties
     }
-    return properties
+  } else if (version.type === 'bedrock') {
+    Block.prototype.getProperties = function () {
+      const states = blockStates[this.stateId].states
+      const ret = {}
+      for (const state in states) {
+        ret[state] = states[state].value
+      }
+      return ret
+    }
   }
 
   Block.prototype.canHarvest = function (heldItemType) {
