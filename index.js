@@ -7,6 +7,7 @@ function loader (mcVersion) {
     Biome: require('prismarine-biome')(mcVersion),
     blocks: mcData.blocks,
     blockStates: mcData.blockStates,
+    blocksByName: mcData.blocksByName,
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
@@ -16,7 +17,7 @@ function loader (mcVersion) {
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultipliers, shapes, version, effectsByName, enchantmentsByName }) {
+function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, toolMultipliers, shapes, version, effectsByName, enchantmentsByName }) {
   Block.fromStateId = function (stateId, biomeId) {
     // 1.13+: metadata is completely removed and only block state IDs are used
     if ((version.type === 'pc' && version['>=']('1.13')) || (version.type === 'bedrock')) {
@@ -51,7 +52,7 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
   }
 
   Block.fromProperties = function (typeId, properties, biomeId) {
-    const block = blocks[typeId]
+    const block = typeof typeId === 'string' ? blocksByName[typeId] : blocks[typeId]
 
     if (block.minStateId == null) {
       throw new Error('Block properties not available in current Minecraft version!')
@@ -64,11 +65,12 @@ function provider ({ Biome, blocks, blocksByStateId, blockStates, toolMultiplier
       }
       return new Block(undefined, biomeId, 0, block.minStateId + data)
     } else if (version.type === 'bedrock') {
-      for (let stateId = block.minStateId; stateId < block.maxStateId; stateId++) {
+      for (let stateId = block.minStateId; stateId <= block.maxStateId; stateId++) {
         const state = blockStates[stateId].states
         if (Object.entries(properties).find(([prop, val]) => state[prop]?.value !== val)) continue
         return new Block(undefined, biomeId, 0, stateId)
       }
+      return block
     }
   }
 
