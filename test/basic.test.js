@@ -21,7 +21,7 @@ describe('Dig time', () => {
         false,
         false,
         false,
-        [{ id: mcData.enchantmentsByName.efficiency.name, lvl: 5 }],
+        [{ name: mcData.enchantmentsByName.efficiency.name, lvl: 5 }],
         {
           [mcData.effectsByName.haste.id]: {
             amplifier: 1,
@@ -49,13 +49,13 @@ describe('Dig time', () => {
           test('using iron_shovel with efficiency 2', () => {
             const tool = mcData.itemsByName.iron_shovel
             const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-            const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 2 }], {})
+            const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 2 }], {})
             expect(time).toBe(100)
           })
           test('using iron_shovel with efficiency 5 (instant break)', () => {
             const tool = mcData.itemsByName.iron_shovel
             const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-            const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 5 }], {})
+            const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 5 }], {})
             expect(time).toBe(0)
           })
           test('using iron_shovel with haste 2', () => {
@@ -67,7 +67,7 @@ describe('Dig time', () => {
           test('using iron_shovel with eff 2 + haste 2 (instant break)', () => {
             const tool = mcData.itemsByName.iron_shovel
             const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-            const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 2 }], { [mcData.effectsByName.haste.id]: { amplifier: 1, lvl: 1 } })
+            const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 2 }], { [mcData.effectsByName.haste.id]: { amplifier: 1, lvl: 1 } })
             expect(time).toBe(0)
           })
         })
@@ -87,13 +87,13 @@ describe('Dig time', () => {
         test('using iron_shovel with efficiency 2', () => {
           const tool = mcData.itemsByName[toolName]
           const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-          const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 2 }], {})
+          const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 2 }], {})
           expect(time).toBe(250)
         })
         test('using iron_shovel with efficiency 5 (instant break)', () => {
           const tool = mcData.itemsByName[toolName]
           const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-          const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 5 }], {})
+          const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 5 }], {})
           expect(time).toBe(100)
         })
         test('using iron_shovel with haste 2', () => {
@@ -105,7 +105,7 @@ describe('Dig time', () => {
         test('using iron_shovel with eff 2 + haste 2 (instant break)', () => {
           const tool = mcData.itemsByName[toolName]
           const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-          const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 2 }], { [mcData.effectsByName.haste.id]: { amplifier: 1, lvl: 1 } })
+          const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 2 }], { [mcData.effectsByName.haste.id]: { amplifier: 1, lvl: 1 } })
           expect(time).toBe(150)
         })
       })
@@ -121,13 +121,13 @@ describe('Dig time', () => {
         test('using iron_shovel with efficiency 2', () => {
           const tool = mcData.itemsByName[toolName]
           const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-          const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 2 }], {})
+          const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 2 }], {})
           expect(time).toBe(450)
         })
         test('using iron_shovel with efficiency 5 (instant break)', () => {
           const tool = mcData.itemsByName[toolName]
           const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-          const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 5 }], {})
+          const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 5 }], {})
           expect(time).toBe(150)
         })
         test('using iron_shovel with haste 2', () => {
@@ -139,7 +139,7 @@ describe('Dig time', () => {
         test('using iron_shovel with eff 2 + haste 2 (instant break)', () => {
           const tool = mcData.itemsByName[toolName]
           const block = Block.fromStateId(mcData.blocksByName[blockName].defaultState)
-          const time = block.digTime(tool.id, false, false, false, [{ id: 'efficiency', lvl: 2 }], { [mcData.effectsByName.haste.id]: { amplifier: 1, lvl: 1 } })
+          const time = block.digTime(tool.id, false, false, false, [{ name: 'efficiency', lvl: 2 }], { [mcData.effectsByName.haste.id]: { amplifier: 1, lvl: 1 } })
           expect(time).toBe(300)
         })
       })
