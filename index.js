@@ -206,11 +206,11 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
     }
 
     for (const enchInfo of enchantments) {
-      if (typeof enchInfo.id === 'string') {
-        if (enchInfo.id.includes(enchantmentName)) {
+      if (typeof enchInfo.name === 'string') {
+        if (enchInfo.name.includes(enchantmentName)) {
           return enchInfo.lvl
         }
-      } else if (enchInfo.id === enchantmentDescriptor.id) {
+      } else if (enchInfo.name === enchantmentDescriptor.name) {
         return enchInfo.lvl
       }
     }

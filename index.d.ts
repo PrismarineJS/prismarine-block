@@ -1,17 +1,11 @@
-/// <reference types="vec3" />
-/// <reference types="prismarine-biome" />
-
-import {Vec3} from 'vec3';
-import {Biome} from 'prismarine-biome';
+import { Vec3 } from 'vec3';
+import { Biome } from 'prismarine-biome';
+import { NormalizedEnchant } from 'prismarine-item';
 
 interface Effect {
     id: number;
     amplifier: number;
     duration: number;
-}
-
-interface Enchantment {
-    level: number;
 }
 
 declare class Block {
@@ -144,7 +138,7 @@ declare class Block {
      * @param enchantments list of enchantments from the held item (from simplified nbt data)
      * @param effects effects on the bot (bot.entity.effects)
      */
-    digTime(heldItemType: number | null, creative: boolean, inWater: boolean, notOnGround: boolean, enchantments?: Enchantment[], effects?: Effect[]): number;
+    digTime(heldItemType: number | null, creative: boolean, inWater: boolean, notOnGround: boolean, enchantments?: NormalizedEnchant[], effects?: Effect[]): number;
 
     fromStateId(stateId: number, biomeId: number): Block;
 
