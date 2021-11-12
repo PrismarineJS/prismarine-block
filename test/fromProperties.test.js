@@ -1,10 +1,12 @@
-/* eslint-env jest */
+/* eslint-env mocha */
 
 const Block = require('../')('1.16.4')
 const mcData = require('minecraft-data')('1.16.4')
 
+const expect = require('expect')
+
 describe('Block From Properties', () => {
-  test('spruce half slab: waterlogged, upper', () => {
+  it('spruce half slab: waterlogged, upper', () => {
     const spruceSlabId = mcData.blocksByName.spruce_slab.id
     const properties = { type: 'top', waterlogged: true }
     const block = Block.fromProperties(spruceSlabId, properties, 0)

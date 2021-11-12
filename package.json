@@ -4,7 +4,7 @@
   "description": "Represent a minecraft block with its associated data",
   "main": "index.js",
   "scripts": {
-    "test": "jest --verbose",
+    "test": "mocha --reporter spec --exit",
     "pretest": "npm run lint",
     "fix": "standard --fix",
     "lint": "standard"
@@ -21,7 +21,8 @@
     "minecraft-data": "^2.62.1"
   },
   "devDependencies": {
-    "jest": "^27.0.4",
+    "mocha": "^9.1.3",
+    "expect": "^27.3.1",
     "minecraft-data": "^2.62.1",
     "standard": "^16.0.1",
     "vec3": "^0.1.4"
