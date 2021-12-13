@@ -1,11 +1,13 @@
-/* eslint-env jest */
+/* eslint-env mocha */
+
+const expect = require('expect')
 
 // https://minecraft.gamepedia.com/Breaking#Blocks_by_hardness
 describe('Dig time', () => {
   describe('1.15.2', () => {
     const Block = require('../')('1.15.2')
     const mcData = require('minecraft-data')('1.15.2')
-    test('dirt by hand', () => {
+    it('dirt by hand', () => {
       const block = Block.fromStateId(mcData.blocksByName.dirt.defaultState, 0)
       const time = block.digTime(null, false, false, false)
       expect(time).toBe(750)
