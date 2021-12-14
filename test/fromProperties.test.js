@@ -1,7 +1,8 @@
-/* eslint-env jest */
+/* eslint-env mocha */
+const expect = require('expect')
 
 describe('Block From Properties', () => {
-  test('spruce half slab: waterlogged, upper (pc_1.16.4)', () => {
+  it('spruce half slab: waterlogged, upper (pc_1.16.4)', () => {
     const Block = require('../')('1.16.4')
     const mcData = require('minecraft-data')('1.16.4')
     const spruceSlabId = mcData.blocksByName.spruce_slab.id
@@ -11,7 +12,7 @@ describe('Block From Properties', () => {
     expect(block.stateId).toBe(8310)
     expect(block.getProperties()).toMatchObject(properties)
   })
-  test('spruce half slab: waterlogged, upper (bedrock_1.17.10)', () => {
+  it('spruce half slab: waterlogged, upper (bedrock_1.17.10)', () => {
     const Block = require('../')('bedrock_1.17.10')
     const mcData = require('minecraft-data')('bedrock_1.17.10')
     const cauldronId = mcData.blocksByName.cauldron.id
