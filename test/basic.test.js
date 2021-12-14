@@ -25,7 +25,7 @@ describe('Dig time', () => {
     })
   })
 
-  for (const version of ['1.17', 'bedrock_1.17.10']) {
+  for (const version of ['1.17', 'bedrock_1.17.10', 'bedrock_1.18.0']) {
     describe(version, () => {
       const Block = require('../')(version)
       const mcData = require('minecraft-data')(version)
