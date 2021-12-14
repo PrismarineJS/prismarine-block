@@ -169,30 +169,30 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
     return value
   }
 
-  if (version.type === 'pc') {
-    Block.prototype.getProperties = function () {
-      const properties = {}
-      const blockEnum = this.stateId === undefined ? blocks[this.type] : blocksByStateId[this.stateId]
-      if (blockEnum && blockEnum.states) {
-        let data = this.metadata
-        for (let i = blockEnum.states.length - 1; i >= 0; i--) {
-          const prop = blockEnum.states[i]
-          properties[prop.name] = propValue(prop, data % prop.num_values)
-          data = Math.floor(data / prop.num_values)
-        }
+  function getPropertiesPC () {
+    const properties = {}
+    const blockEnum = this.stateId === undefined ? blocks[this.type] : blocksByStateId[this.stateId]
+    if (blockEnum && blockEnum.states) {
+      let data = this.metadata
+      for (let i = blockEnum.states.length - 1; i >= 0; i--) {
+        const prop = blockEnum.states[i]
+        properties[prop.name] = propValue(prop, data % prop.num_values)
+        data = Math.floor(data / prop.num_values)
       }
-      return properties
     }
-  } else if (version.type === 'bedrock') {
-    Block.prototype.getProperties = function () {
-      const states = blockStates[this.stateId].states
-      const ret = {}
-      for (const state in states) {
-        ret[state] = states[state].value
-      }
-      return ret
-    }
+    return properties
   }
+
+  function getPropertiesBedrock () {
+    const states = blockStates[this.stateId].states
+    const ret = {}
+    for (const state in states) {
+      ret[state] = states[state].value
+    }
+    return ret
+  }
+
+  Block.prototype.getProperties = { pc: getPropertiesPC, bedrock: getPropertiesBedrock }[version.type]
 
   Block.prototype.canHarvest = function (heldItemType) {
     if (!this.harvestTools) { return true }; // for blocks harvestable by hand

@@ -1,4 +1,4 @@
-/* eslint-env mocha */
+/* eslint-env jest */
 
 describe('Block From Properties', () => {
   test('spruce half slab: waterlogged, upper (pc_1.16.4)', () => {
