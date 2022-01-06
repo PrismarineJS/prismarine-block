@@ -1,24 +1,26 @@
 module.exports = loader
-module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4']
+module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4', 'bedrock_1.17.10', 'bedrock_1.18.0']
 
 function loader (mcVersion) {
   const mcData = require('minecraft-data')(mcVersion)
   return provider({
     Biome: require('prismarine-biome')(mcVersion),
     blocks: mcData.blocks,
+    blockStates: mcData.blockStates,
+    blocksByName: mcData.blocksByName,
     blocksByStateId: mcData.blocksByStateId,
     toolMultipliers: mcData.materials,
     shapes: mcData.blockCollisionShapes,
-    isVersionNewerOrEqualTo: mcData.type === 'bedrock' ? () => false : mcData.isNewerOrEqualTo.bind(mcData),
+    version: mcData.version,
     effectsByName: mcData.effectsByName,
     enchantmentsByName: mcData.enchantmentsByName
   })
 }
 
-function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, isVersionNewerOrEqualTo, effectsByName, enchantmentsByName }) {
+function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, toolMultipliers, shapes, version, effectsByName, enchantmentsByName }) {
   Block.fromStateId = function (stateId, biomeId) {
     // 1.13+: metadata is completely removed and only block state IDs are used
-    if (isVersionNewerOrEqualTo('1.13')) {
+    if ((version.type === 'pc' && version['>=']('1.13')) || (version.type === 'bedrock')) {
       return new Block(undefined, biomeId, 0, stateId)
     } else {
       return new Block(stateId >> 4, biomeId, stateId & 15)
@@ -50,17 +52,26 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
   }
 
   Block.fromProperties = function (typeId, properties, biomeId) {
-    const block = blocks[typeId]
+    const block = typeof typeId === 'string' ? blocksByName[typeId] : blocks[typeId]
 
     if (block.minStateId == null) {
       throw new Error('Block properties not available in current Minecraft version!')
     }
 
-    let data = 0
-    for (const [key, value] of Object.entries(properties)) {
-      data += getStateValue(block.states, key, value)
+    if (version.type === 'pc') {
+      let data = 0
+      for (const [key, value] of Object.entries(properties)) {
+        data += getStateValue(block.states, key, value)
+      }
+      return new Block(undefined, biomeId, 0, block.minStateId + data)
+    } else if (version.type === 'bedrock') {
+      for (let stateId = block.minStateId; stateId <= block.maxStateId; stateId++) {
+        const state = blockStates[stateId].states
+        if (Object.entries(properties).find(([prop, val]) => state[prop]?.value !== val)) continue
+        return new Block(undefined, biomeId, 0, stateId)
+      }
+      return block
     }
-    return new Block(undefined, biomeId, 0, block.minStateId + data)
   }
 
   if (shapes) {
@@ -69,7 +80,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
       const block = blocks[id]
       const shapesId = shapes.blocks[block.name]
       block.shapes = (shapesId instanceof Array) ? shapes.shapes[shapesId[0]] : shapes.shapes[shapesId]
-      if ('states' in block) { // post 1.13
+      if (block.states || version.type === 'bedrock') { // post 1.13
         if (shapesId instanceof Array) {
           block.stateShapes = []
           for (const i in shapesId) {
@@ -87,6 +98,12 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
             }
           }
         }
+      }
+
+      if (!block.shapes && version.type === 'bedrock') {
+        // if no shapes are present for this block (for example, some chemistry stuff we don't have BBs for), assume it's stone
+        block.shapes = shapes.shapes[shapes.blocks.stone[0]]
+        block.stateShapes = block.shapes
       }
     }
   }
@@ -112,13 +129,15 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
       this.hardness = blockEnum.hardness
       this.displayName = blockEnum.displayName
       this.shapes = blockEnum.shapes
-      if ('stateShapes' in blockEnum) {
+      if (blockEnum.stateShapes) {
         if (blockEnum.stateShapes[this.metadata] !== undefined) {
           this.shapes = blockEnum.stateShapes[this.metadata]
         } else {
+          // Default to shape 0
+          this.shapes = blockEnum.stateShapes[0]
           this.missingStateShape = true
         }
-      } else if ('variations' in blockEnum) {
+      } else if (blockEnum.variations) {
         const variations = blockEnum.variations
         for (const i in variations) {
           if (variations[i].metadata === metadata) {
@@ -150,7 +169,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
     return value
   }
 
-  Block.prototype.getProperties = function () {
+  function getPropertiesPC () {
     const properties = {}
     const blockEnum = this.stateId === undefined ? blocks[this.type] : blocksByStateId[this.stateId]
     if (blockEnum && blockEnum.states) {
@@ -164,6 +183,17 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
     return properties
   }
 
+  function getPropertiesBedrock () {
+    const states = blockStates[this.stateId].states
+    const ret = {}
+    for (const state in states) {
+      ret[state] = states[state].value
+    }
+    return ret
+  }
+
+  Block.prototype.getProperties = { pc: getPropertiesPC, bedrock: getPropertiesBedrock }[version.type]
+
   Block.prototype.canHarvest = function (heldItemType) {
     if (!this.harvestTools) { return true }; // for blocks harvestable by hand
     return heldItemType && this.harvestTools && this.harvestTools[heldItemType]
@@ -173,7 +203,7 @@ function provider ({ Biome, blocks, blocksByStateId, toolMultipliers, shapes, is
   let statusEffectNames
 
   // 1.17+: effect names have been fixed to actually match their registry names
-  if (isVersionNewerOrEqualTo('1.17')) {
+  if (version['>=']('1.17')) {
     statusEffectNames = {
       hasteEffectName: 'haste',
       miningFatigueEffectName: 'mining_fatigue',
