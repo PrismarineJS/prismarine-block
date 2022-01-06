@@ -132,6 +132,10 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.11.0
+
+* support bedrock
+
 ### 1.10.3
 
 * use normalized enchant rather than custom format (@u9g #41)

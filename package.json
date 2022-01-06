@@ -1,6 +1,6 @@
 {
   "name": "prismarine-block",
-  "version": "1.10.3",
+  "version": "1.11.0",
   "description": "Represent a minecraft block with its associated data",
   "main": "index.js",
   "scripts": {
