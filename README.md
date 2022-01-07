@@ -132,6 +132,9 @@ The blocks or items dropped by that block.
 
 ## History
 
+### 1.11.1
+* updates for bedrock
+
 ### 1.11.0
 
 * support bedrock
