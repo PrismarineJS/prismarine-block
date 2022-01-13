@@ -7,9 +7,10 @@ Represent a minecraft block with its associated data
 ## Usage
 
 ```js
-const Block = require('prismarine-block')('1.8')
+const registry = require('prismarine-registry')('1.8')
+const Block = require('prismarine-block')(registry)
 
-const stoneBlock = new Block(1, 1, 0)
+const stoneBlock = new Block(registry.blocksByName.stone, registry.biomesByName.plains, /* meta */ 0)
 
 console.log(stoneBlock)
 
@@ -131,6 +132,9 @@ The set of tools that will allow you to harvest the block.
 The blocks or items dropped by that block.
 
 ## History
+
+### 1.12.0
+* Updated to support `prismarine-registry`. To use, instead of passing a string to prismarine-biome's default function export, pass an instance of `prismarine-registry`.
 
 ### 1.11.0
 

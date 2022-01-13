@@ -3,7 +3,7 @@ module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2',
 
 function loader (registryOrVersion) {
   const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
-  const mcVersion = registry.version.type === 'bedrock' ? 'bedrock_' + registry.version.majorVersion : registry.version.minecraftVersion // Legacy
+  const mcVersion = registry.version.type === 'bedrock' ? 'bedrock_' + registry.version.majorVersion : registry.version.minecraftVersion // until prismarine-biome supports registry
 
   const version = registry.version
   const features = {
@@ -14,7 +14,6 @@ function loader (registryOrVersion) {
   return provider(registry, { Biome: require('prismarine-biome')(mcVersion), features, version })
 }
 
-// { Biome, blocks, blocksByName, blocksByStateId, blockStates, toolMultipliers, shapes, version, effectsByName, enchantmentsByName }
 function provider (registry, { Biome, version, features }) {
   Block.fromStateId = function (stateId, biomeId) {
     // 1.13+: metadata is completely removed and only block state IDs are used

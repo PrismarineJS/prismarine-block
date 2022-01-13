@@ -1,6 +1,7 @@
 import { Vec3 } from 'vec3';
 import { Biome } from 'prismarine-biome';
 import { NormalizedEnchant } from 'prismarine-item';
+import Registry from 'prismarine-registry';
 
 interface Effect {
     id: number;
@@ -151,4 +152,6 @@ declare class Block {
     static fromProperties(typeId: number, properties: { [key: string]: string | number }, biomeId: number): Block;
 }
 
+/** @deprecated */
 export declare function loader(mcVersion: string): typeof Block;
+export declare function loader(registry: ReturnType<typeof Registry>): typeof Block;
