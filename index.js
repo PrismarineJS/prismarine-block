@@ -33,7 +33,7 @@ function provider (registry, { Biome, version, features }) {
       if (value === false) return 1
     }
     // Assume by-name mapping for unknown properties
-    return state.values.indexOf(value.toString())
+    return state.values?.indexOf(value.toString()) ?? 0
   }
 
   function getStateValue (states, name, value) {
