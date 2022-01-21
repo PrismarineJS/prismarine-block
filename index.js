@@ -1,26 +1,23 @@
 module.exports = loader
 module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4', 'bedrock_1.17.10', 'bedrock_1.18.0']
 
-function loader (mcVersion) {
-  const mcData = require('minecraft-data')(mcVersion)
-  return provider({
-    Biome: require('prismarine-biome')(mcVersion),
-    blocks: mcData.blocks,
-    blockStates: mcData.blockStates,
-    blocksByName: mcData.blocksByName,
-    blocksByStateId: mcData.blocksByStateId,
-    toolMultipliers: mcData.materials,
-    shapes: mcData.blockCollisionShapes,
-    version: mcData.version,
-    effectsByName: mcData.effectsByName,
-    enchantmentsByName: mcData.enchantmentsByName
-  })
+function loader (registryOrVersion) {
+  const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
+  const mcVersion = registry.version.type === 'bedrock' ? 'bedrock_' + registry.version.majorVersion : registry.version.minecraftVersion // until prismarine-biome supports registry
+
+  const version = registry.version
+  const features = {
+    usesBlockStates: (version.type === 'pc' && version['>=']('1.13')) || (version.type === 'bedrock'),
+    effectNamesMatchRegistryName: version['>=']('1.17')
+  }
+
+  return provider(registry, { Biome: require('prismarine-biome')(mcVersion), features, version })
 }
 
-function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, toolMultipliers, shapes, version, effectsByName, enchantmentsByName }) {
+function provider (registry, { Biome, version, features }) {
   Block.fromStateId = function (stateId, biomeId) {
     // 1.13+: metadata is completely removed and only block state IDs are used
-    if ((version.type === 'pc' && version['>=']('1.13')) || (version.type === 'bedrock')) {
+    if (features.usesBlockStates) {
       return new Block(undefined, biomeId, 0, stateId)
     } else {
       return new Block(stateId >> 4, biomeId, stateId & 15)
@@ -36,7 +33,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
       if (value === false) return 1
     }
     // Assume by-name mapping for unknown properties
-    return state.values.indexOf(value.toString())
+    return state.values?.indexOf(value.toString()) ?? 0
   }
 
   function getStateValue (states, name, value) {
@@ -52,7 +49,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
   }
 
   Block.fromProperties = function (typeId, properties, biomeId) {
-    const block = typeof typeId === 'string' ? blocksByName[typeId] : blocks[typeId]
+    const block = typeof typeId === 'string' ? registry.blocksByName[typeId] : registry.blocks[typeId]
 
     if (block.minStateId == null) {
       throw new Error('Block properties not available in current Minecraft version!')
@@ -66,7 +63,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
       return new Block(undefined, biomeId, 0, block.minStateId + data)
     } else if (version.type === 'bedrock') {
       for (let stateId = block.minStateId; stateId <= block.maxStateId; stateId++) {
-        const state = blockStates[stateId].states
+        const state = registry.blockStates[stateId].states
         if (Object.entries(properties).find(([prop, val]) => state[prop]?.value !== val)) continue
         return new Block(undefined, biomeId, 0, stateId)
       }
@@ -74,10 +71,11 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
     }
   }
 
+  const shapes = registry.blockCollisionShapes
   if (shapes) {
     // Prepare block shapes
-    for (const id in blocks) {
-      const block = blocks[id]
+    for (const id in registry.blocks) {
+      const block = registry.blocks[id]
       const shapesId = shapes.blocks[block.name]
       block.shapes = (shapesId instanceof Array) ? shapes.shapes[shapesId[0]] : shapes.shapes[shapesId]
       if (block.states || version.type === 'bedrock') { // post 1.13
@@ -117,7 +115,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
     this.position = null
     this.stateId = stateId
 
-    const blockEnum = stateId === undefined ? blocks[type] : blocksByStateId[stateId]
+    const blockEnum = stateId === undefined ? registry.blocks[type] : registry.blocksByStateId[stateId]
     if (blockEnum) {
       if (stateId === undefined) {
         this.stateId = blockEnum.minStateId
@@ -171,7 +169,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
 
   function getPropertiesPC () {
     const properties = {}
-    const blockEnum = this.stateId === undefined ? blocks[this.type] : blocksByStateId[this.stateId]
+    const blockEnum = this.stateId === undefined ? registry.blocks[this.type] : registry.blocksByStateId[this.stateId]
     if (blockEnum && blockEnum.states) {
       let data = this.metadata
       for (let i = blockEnum.states.length - 1; i >= 0; i--) {
@@ -184,7 +182,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
   }
 
   function getPropertiesBedrock () {
-    const states = blockStates[this.stateId].states
+    const states = registry.blockStates[this.stateId].states
     const ret = {}
     for (const state in states) {
       ret[state] = states[state].value
@@ -203,7 +201,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
   let statusEffectNames
 
   // 1.17+: effect names have been fixed to actually match their registry names
-  if (version['>=']('1.17')) {
+  if (features.effectNamesMatchRegistryName) {
     statusEffectNames = {
       hasteEffectName: 'haste',
       miningFatigueEffectName: 'mining_fatigue',
@@ -218,7 +216,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
   }
 
   function getEffectLevel (effectName, effects) {
-    const effectDescriptor = effectsByName[effectName]
+    const effectDescriptor = registry.effectsByName[effectName]
     if (!effectDescriptor) {
       return 0
     }
@@ -230,7 +228,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
   }
 
   function getEnchantmentLevel (enchantmentName, enchantments) {
-    const enchantmentDescriptor = enchantmentsByName[enchantmentName]
+    const enchantmentDescriptor = registry.enchantmentsByName[enchantmentName]
     if (!enchantmentDescriptor) {
       return 0
     }
@@ -263,7 +261,7 @@ function provider ({ Biome, blocks, blocksByName, blocksByStateId, blockStates, 
   Block.prototype.digTime = function (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
     if (creative) return 0
 
-    const materialToolMultipliers = toolMultipliers[this.material]
+    const materialToolMultipliers = registry.materials[this.material]
     const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
 
     // Compute breaking speed multiplier

@@ -5,8 +5,9 @@ const assert = require('assert')
 
 testedVersions.forEach(version => {
   describe(version, () => {
-    const blockArray = require('minecraft-data')(version).blocksArray
-    const Block = require('../')(version)
+    const registry = require('prismarine-registry')(version)
+    const blockArray = registry.blocksArray
+    const Block = require('prismarine-block')(registry)
     blockArray.forEach(block => {
       it('shape ' + block.name, () => {
         const blockV = new Block(block.id, 0, 0, block.defaultState)
