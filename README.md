@@ -72,6 +72,14 @@ Numerical id.
 
 Array of bounding boxes representing the block shape. Each bounding box is an array of the form `[xmin, ymin, zmin, xmax, ymax, zmax]`. Depends on the type and state of the block.
 
+#### block.entity
+
+If this block is a block entity, this contains the NBT data for the entity
+
+#### block.blockEntity
+
+Simplified block entity data using prismarine-nbt's simplify() function. Only for reading - data modified here cannot be saved back later.
+
 #### block.metadata
 
 Number which represents different things depending on the block.
