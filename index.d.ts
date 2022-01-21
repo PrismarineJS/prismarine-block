@@ -1,5 +1,6 @@
 import { Vec3 } from 'vec3';
 import { Biome } from 'prismarine-biome';
+import { NBT } from 'prismarine-nbt';
 import { NormalizedEnchant } from 'prismarine-item';
 import Registry from 'prismarine-registry';
 
@@ -30,6 +31,12 @@ declare class Block {
     light: number;
 
     skyLight: number;
+
+    // Contains a simplified NBT object
+    blockEntity: object;
+    // Only set if this block is an actual entity (or has an entity component to it)
+    // Contains a full NBT, unserialized object
+    entity: NBT | null;
 
     /**
      * A biome instance.
