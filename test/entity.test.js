@@ -3,7 +3,7 @@ const assert = require('assert')
 const nbt = require('prismarine-nbt')
 
 describe('handles block entities', () => {
-  for (const version of ['pc_1.15.2', 'bedrock_1.18']) {
+  for (const version of ['pc_1.15.2', 'bedrock_1.18.0']) {
     it('creates a block entity on ' + version, () => {
       const registry = require('prismarine-registry')(version)
       const Block = require('prismarine-block')(registry)
