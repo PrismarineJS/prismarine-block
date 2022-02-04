@@ -24,7 +24,7 @@ console.log(stoneBlock.digTime(257))
 
 ## API
 
-See [doc/API.md](API.md)
+See [doc/API.md](doc/API.md)
 
 ## History
 
