@@ -28,6 +28,10 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.13.1
+
+* Change blockEntity version handling
+
 ### 1.13.0
 
 * Add sign block entity implementation
