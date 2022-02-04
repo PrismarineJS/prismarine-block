@@ -1,10 +1,9 @@
 const nbt = require('prismarine-nbt')
 
 module.exports = registry => {
-  const ChatMessage = require('prismarine-chat')(registry.version.majorVersion)
-
-  return {
-    pc: {
+  if (registry.version.type === 'pc') {
+    const ChatMessage = require('prismarine-chat')(registry.version.majorVersion)
+    return {
       sign: {
         get blockEntity () {
           // Compatibility for mineflayer, which changes .blockEntity for signs to contain ChatMessages instead of simplified NBT
@@ -66,8 +65,11 @@ module.exports = registry => {
           return texts.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n')
         }
       }
-    },
-    bedrock: {
+    }
+  }
+
+  if (registry.version.type === 'bedrock') {
+    return {
       sign: {
         get signText () {
           if (!this.entity) {
@@ -89,5 +91,5 @@ module.exports = registry => {
         }
       }
     }
-  }[registry.version.type]
+  }
 }
