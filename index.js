@@ -17,6 +17,7 @@ function loader (registryOrVersion) {
 }
 
 function provider (registry, { Biome, version, features }) {
+  const blockMethods = require('./blockEntity')(registry)
   const shapes = registry.blockCollisionShapes
   if (shapes) {
     // Prepare block shapes
@@ -163,6 +164,11 @@ function provider (registry, { Biome, version, features }) {
         this.boundingBox = 'empty'
         this.transparent = true
         this.diggable = false
+      }
+
+      // This can be expanded to other non-sign related things
+      if (this.name.includes('sign')) {
+        mergeObject(this, blockMethods.sign)
       }
     }
 
@@ -347,4 +353,8 @@ function provider (registry, { Biome, version, features }) {
     if (state.type === 'bool') return !value
     return value
   }
+}
+
+function mergeObject (to, from) {
+  Object.defineProperties(to, Object.getOwnPropertyDescriptors(from))
 }
