@@ -1,7 +1,7 @@
 const nbt = require('prismarine-nbt')
 
 module.exports = registry => {
-  const ChatMessage = require('prismarine-chat')(registry.version.majorVersion)
+  const ChatMessage = registry.version.type === 'pc' ? require('prismarine-chat')(registry.version.majorVersion) : null
 
   return {
     pc: {
