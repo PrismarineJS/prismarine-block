@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 const expect = require('expect')
 const assert = require('assert')
-const mcData = require('minecraft-data')
+const testedVersions = require('..').testedVersions
 
 describe('Block From Properties', () => {
   it('spruce half slab: waterlogged, upper (pc_1.16.4)', () => {
@@ -24,31 +24,42 @@ describe('Block From Properties', () => {
   })
 })
 
-describe('all versions should return block state and properties', () => {
-  for (const e of ['pc', 'bedrock']) {
-    const vers = mcData.versions[e]
-    for (const { minecraftVersion } of vers.filter(v => !!mcData(v.minecraftVersion))) {
-      it(`${e} ${minecraftVersion}`, () => {
-        const registry = require('prismarine-registry')(`${e}_${minecraftVersion}`)
-        const Block = require('prismarine-block')(registry)
+describe('versions should return block state and properties', () => {
+  for (const ver of testedVersions) {
+    const e = ver.startsWith('bedrock') ? 'bedrock' : 'pc'
+    it(ver, () => {
+      const registry = require('prismarine-registry')(ver)
+      const Block = require('prismarine-block')(registry)
 
-        // Test that .stateId is set on all versions
-        {
-          const blockData = registry.blocksByName.dirt
-          const block = Block.fromStateId(blockData.defaultState)
-          assert(block.stateId >= blockData.minStateId && block.stateId <= blockData.maxStateId)
-          expect(block.getProperties()).toMatchObject({})
-        }
+      // Test that .stateId is set on all versions
+      {
+        const blockData = registry.blocksByName.redstone_lamp
+        const block = Block.fromStateId(blockData.defaultState)
+        assert(block.stateId >= blockData.minStateId && block.stateId <= blockData.maxStateId)
+        expect(block.getProperties()).toMatchObject({})
+      }
 
-        // make sure that .fromProperties works
-        {
-          const blockData = registry.blocksByName.light_weighted_pressure_plate
-          const properties = { pc: { power: 2 }, bedrock: { redstone_signal: 2 } }[e]
-          const block = Block.fromProperties(blockData.name, properties, 0)
-          assert(block.stateId >= blockData.minStateId && block.stateId <= blockData.maxStateId)
-          expect(block.getProperties()).toMatchObject(properties)
-        }
-      })
-    }
+      // make sure that .fromProperties works
+      {
+        const blockData = registry.blocksByName.light_weighted_pressure_plate
+        const properties = { pc: { power: 2 }, bedrock: { redstone_signal: 2 } }[e]
+        const block = Block.fromProperties(blockData.name, properties, 0)
+        assert(block.stateId >= blockData.minStateId && block.stateId <= blockData.maxStateId)
+        expect(block.getProperties()).toMatchObject(properties)
+      }
+
+      // Make sure type IDs work
+      {
+        const blockData = registry.blocksByName.dirt
+        const block = new Block(blockData.id, 0, 2)
+        assert(block.name === 'dirt')
+
+        const block2 = new Block(blockData.id, 0, 99)
+        assert(block2.name === 'dirt')
+
+        const invalid = new Block(9999, 0, 0)
+        assert(invalid.name === '')
+      }
+    })
   }
 })
