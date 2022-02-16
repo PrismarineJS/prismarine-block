@@ -2,6 +2,24 @@ module.exports = loader
 module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4', '1.17.1', '1.18.1', 'bedrock_1.17.10', 'bedrock_1.18.0']
 
 const nbt = require('prismarine-nbt')
+const mcData = require('minecraft-data')
+const legacyPcBlocksByName = Object.entries(mcData.legacy.pc.blocks).reduce((obj, [idmeta, name]) => {
+  const n = name.replace('minecraft:', '').split('[')[0]
+  const s = name.split('[')[1]?.replace(']', '') ?? ''
+  ;(obj[n] = obj[n] || {})[s] = idmeta
+  return obj // array of { [name]: { [states string]: string(id:meta) } }
+}, {})
+const legacyPcBlocksByIdmeta = Object.entries(mcData.legacy.pc.blocks).reduce((obj, [idmeta, name]) => {
+  const s = name.split('[')[1]?.replace(']', '')
+  obj[idmeta] = s
+    ? Object.fromEntries(s.split(',').map(s => {
+        let [k, v] = s.split('=')
+        if (!isNaN(parseInt(v))) v = parseInt(v)
+        return [k, v]
+      }))
+    : {}
+  return obj // array of { '255:0': { mode: 'save' }, }
+}, {})
 
 function loader (registryOrVersion) {
   const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
@@ -120,8 +138,13 @@ function provider (registry, { Biome, version, features }) {
       this.biome = new Biome(biomeId)
       this.position = null
       this.stateId = stateId
+      this.computedStates = {}
 
-      const blockEnum = stateId === undefined ? registry.blocks[type] : registry.blocksByStateId[stateId]
+      if (stateId === undefined && type !== undefined) {
+        this.stateId = (type << 4) | (metadata || 0)
+      }
+
+      const blockEnum = registry.blocksByStateId[stateId]
       if (blockEnum) {
         if (stateId === undefined) {
           this.stateId = blockEnum.minStateId
@@ -166,6 +189,28 @@ function provider (registry, { Biome, version, features }) {
         this.diggable = false
       }
 
+      this._properties = {}
+      if (version.type === 'pc') {
+        if (features.usesBlockStates) {
+          const blockEnum = registry.blocksByStateId[this.stateId]
+          if (blockEnum && blockEnum.states) {
+            let data = this.metadata
+            for (let i = blockEnum.states.length - 1; i >= 0; i--) {
+              const prop = blockEnum.states[i]
+              this._properties[prop.name] = propValue(prop, data % prop.num_values)
+              data = Math.floor(data / prop.num_values)
+            }
+          }
+        } else {
+          this._properties = legacyPcBlocksByIdmeta[this.type + ':' + this.metadata] || legacyPcBlocksByIdmeta[this.type + ':0']
+        }
+      } else if (version.type === 'bedrock') {
+        const states = registry.blockStates[this.stateId].states
+        for (const state in states) {
+          this._properties[state] = states[state].value
+        }
+      }
+
       // This can be expanded to other non-sign related things
       if (this.name.includes('sign')) {
         mergeObject(this, blockMethods.sign)
@@ -184,16 +229,31 @@ function provider (registry, { Biome, version, features }) {
     static fromProperties (typeId, properties, biomeId) {
       const block = typeof typeId === 'string' ? registry.blocksByName[typeId] : registry.blocks[typeId]
 
-      if (block.minStateId == null) {
-        throw new Error('Block properties not available in current Minecraft version!')
-      }
-
       if (version.type === 'pc') {
-        let data = 0
-        for (const [key, value] of Object.entries(properties)) {
-          data += getStateValue(block.states, key, value)
+        if (block.states) {
+          let data = 0
+          for (const [key, value] of Object.entries(properties)) {
+            data += getStateValue(block.states, key, value)
+          }
+          return new Block(undefined, biomeId, 0, block.minStateId + data)
+        } else {
+          const states = legacyPcBlocksByName[block.name]
+          for (const state in states) {
+            let broke
+            for (const [key, value] of Object.entries(properties)) {
+              const s = key + '=' + value
+              if (!state.includes(s)) {
+                broke = true
+                break
+              }
+            }
+            if (!broke) {
+              const [id, meta] = states[state].split(':').map(Number)
+              return new Block(id, biomeId, meta)
+            }
+          }
+          throw new Error('No matching block state found for ' + block.name + ' with properties ' + JSON.stringify(properties)) // This should not happen
         }
-        return new Block(undefined, biomeId, 0, block.minStateId + data)
       } else if (version.type === 'bedrock') {
         for (let stateId = block.minStateId; stateId <= block.maxStateId; stateId++) {
           const state = registry.blockStates[stateId].states
@@ -208,35 +268,8 @@ function provider (registry, { Biome, version, features }) {
       return this.entity ? nbt.simplify(this.entity) : undefined
     }
 
-    _getPropertiesPC () {
-      const properties = {}
-      const blockEnum = this.stateId === undefined ? registry.blocks[this.type] : registry.blocksByStateId[this.stateId]
-      if (blockEnum && blockEnum.states) {
-        let data = this.metadata
-        for (let i = blockEnum.states.length - 1; i >= 0; i--) {
-          const prop = blockEnum.states[i]
-          properties[prop.name] = propValue(prop, data % prop.num_values)
-          data = Math.floor(data / prop.num_values)
-        }
-      }
-      return properties
-    }
-
-    _getPropertiesBedrock () {
-      const states = registry.blockStates[this.stateId].states
-      const ret = {}
-      for (const state in states) {
-        ret[state] = states[state].value
-      }
-      return ret
-    }
-
     getProperties () {
-      if (version.type === 'pc') {
-        return this._getPropertiesPC()
-      } else if (version.type === 'bedrock') {
-        return this._getPropertiesBedrock()
-      }
+      return Object.assign(this._properties, this.computedStates)
     }
 
     canHarvest (heldItemType) {
@@ -331,6 +364,9 @@ function provider (registry, { Biome, version, features }) {
     if (state.type === 'bool') {
       if (value === true) return 0
       if (value === false) return 1
+    }
+    if (state.type === 'int') {
+      return value
     }
     // Assume by-name mapping for unknown properties
     return state.values?.indexOf(value.toString()) ?? 0
