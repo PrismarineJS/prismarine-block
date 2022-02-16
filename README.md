@@ -28,6 +28,10 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.14.0
+
+* Add .stateId, .fromProperties, .getProps for all versions
+
 ### 1.13.1
 
 * Change blockEntity version handling
