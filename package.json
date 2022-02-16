@@ -21,7 +21,7 @@
     "prismarine-registry": "^1.1.0"
   },
   "peerDependencies": {
-    "minecraft-data": "^2.62.1"
+    "minecraft-data": "^2.113.1"
   },
   "devDependencies": {
     "expect": "^27.3.1",
