@@ -28,6 +28,10 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.14.1
+
+* Legacy version fixes
+
 ### 1.14.0
 
 * Add .stateId, .fromProperties, .getProps for all versions
