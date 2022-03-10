@@ -140,6 +140,8 @@ function provider (registry, { Biome, version, features }) {
       this.stateId = stateId
       this.computedStates = {}
 
+      if (this.metadata == null) this.metadata = 0
+
       if (stateId === undefined && type !== undefined) {
         const b = registry.blocks[type]
         // Make sure the block is actually valid and metadata is within valid bounds
