@@ -28,6 +28,11 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.15.0
+
+* Effect names were normalized
+* Metadata to 0 by default
+
 ### 1.14.1
 
 * Legacy version fixes
