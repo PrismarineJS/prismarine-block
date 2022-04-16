@@ -28,6 +28,10 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.16.0
+
+* fix mcdata dep
+
 ### 1.15.0
 
 * Effect names were normalized
