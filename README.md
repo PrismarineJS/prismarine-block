@@ -28,6 +28,10 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.16.2
+
+* correct
+
 ### 1.16.1
 
 * fix mcdata dep
