@@ -22,7 +22,7 @@
     "prismarine-registry": "^1.1.0"
   },
   "devDependencies": {
-    "expect": "^27.3.1",
+    "expect": "^28.0.1",
     "minecraft-protocol": "^1.30.0",
     "minecraft-wrap": "^1.4.0",
     "mocha": "^9.1.3",
