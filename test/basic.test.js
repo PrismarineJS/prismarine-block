@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-const expect = require('expect')
+const expect = require('expect').default
 
 // https://minecraft.gamepedia.com/Breaking#Blocks_by_hardness
 describe('Dig time', () => {
