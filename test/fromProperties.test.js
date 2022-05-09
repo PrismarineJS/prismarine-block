@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-const expect = require('expect')
+const expect = require('expect').default
 const assert = require('assert')
 const testedVersions = require('..').testedVersions
 
