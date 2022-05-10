@@ -27,7 +27,7 @@
     "minecraft-wrap": "^1.4.0",
     "mocha": "^10.0.0",
     "prismarine-block": "file:",
-    "standard": "^16.0.4"
+    "standard": "^17.0.0"
   },
   "keywords": [
     "prismarine",
