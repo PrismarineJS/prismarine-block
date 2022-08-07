@@ -156,7 +156,7 @@ declare class Block {
      * @param properties - A dictionary of block states to build from.
      * @param biomeId - The biome this block is in.
      */
-    static fromProperties(typeId: number, properties: { [key: string]: string | number }, biomeId: number): Block;
+    static fromProperties(typeId: number | string, properties: { [key: string]: string | number }, biomeId: number): Block;
 }
 
 /** @deprecated */
