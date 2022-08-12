@@ -246,6 +246,14 @@ function provider (registry, { Biome, version, features }) {
       }
     }
 
+    static fromString (str, biomeId) {
+      if (str.startsWith('minecraft:')) str = str.substring(10)
+      const name = str.split('[', 1)[0]
+      const propertiesStr = str.slice(name.length + 1, -1)
+      const properties = Object.fromEntries(propertiesStr.split(',').map(property => property.split({ pc: '=', bedrock: ':' }[version.type]).map(str => str.startsWith('"') ? str.slice(1, -1) : str)))
+      return Block.fromProperties(name, properties, biomeId)
+    }
+
     get blockEntity () {
       return this.entity ? nbt.simplify(this.entity) : undefined
     }

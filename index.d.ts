@@ -157,6 +157,8 @@ declare class Block {
      * @param biomeId - The biome this block is in.
      */
     static fromProperties(typeId: number | string, properties: { [key: string]: string | number }, biomeId: number): Block;
+    
+    static fromString(string: string, biomeId: number): Block;
 }
 
 /** @deprecated */
