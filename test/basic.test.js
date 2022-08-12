@@ -163,3 +163,16 @@ describe('Dig time', () => {
     })
   }
 })
+
+describe('fromString', () => {
+  const versions = {
+    1.18: 'minecraft:candle[lit=true]',
+    'pe_1.18.0': 'minecraft:candle["lit":true]'
+  }
+  for (const [version, str] of Object.entries(versions)) {
+    const Block = require('prismarine-block')(version)
+    const block = Block.fromString(str, 0)
+    console.log(block)
+    expect(block.getProperties().lit).toBeTruthy()
+  }
+})
