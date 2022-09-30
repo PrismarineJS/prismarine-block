@@ -19,3 +19,5 @@ console.log(redstoneBlock)
 
 console.log(BlockNew.fromStateId(1649, 0).shapes) // stairs
 console.log(BlockNew.fromStateId(1651, 0).shapes) // stairs
+
+console.log(BlockNew.fromString('minecraft:redstone_wire[power=15]', 0).getProperties().power) // get power level

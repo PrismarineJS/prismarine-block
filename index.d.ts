@@ -158,7 +158,12 @@ declare class Block {
      */
     static fromProperties(typeId: number | string, properties: { [key: string]: string | number }, biomeId: number): Block;
     
-    static fromString(string: string, biomeId: number): Block;
+    /**
+     * Create a block from a given string.
+     * @param stateString - the string representation of a block 
+     * @param biomeId - the biome numerical id
+     */
+    static fromString(stateString: string, biomeId: number): Block;
 }
 
 /** @deprecated */
