@@ -135,7 +135,7 @@ declare class Block {
     /**
      * Parse the block state and return its properties.
      */
-    getProperties() : { [key: string]: string | number }
+    getProperties() : { [key: string]: string | number | boolean };
 
     /**
      * Tells you how long it will take to dig the block, in milliseconds.
