@@ -160,5 +160,7 @@ declare class Block {
 }
 
 /** @deprecated */
-export declare function loader(mcVersion: string): typeof Block;
-export declare function loader(registry: ReturnType<typeof Registry>): typeof Block;
+function loader(mcVersion: string): typeof Block;
+function loader(registry: ReturnType<typeof Registry>): typeof Block;
+
+export = loader
