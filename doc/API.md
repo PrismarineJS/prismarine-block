@@ -2,6 +2,11 @@
 
 #### Block.fromStateId(stateId, biomeId)
 
+#### Block.fromString(stateString, biomeId)
+
+* `stateString` is the string representation of a block
+* `biomeId` is the biome numerical id
+
 #### Block(type,biomeId,metadata)
 
 Constructor of a block

@@ -248,6 +248,20 @@ function provider (registry, { Biome, version, features }) {
       }
     }
 
+    static fromString (str, biomeId) {
+      if (str.startsWith('minecraft:')) str = str.substring(10)
+      const name = str.split('[', 1)[0]
+      const propertiesStr = str.slice(name.length + 1, -1).split(',')
+      if (version.type === 'pc') {
+        return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => property.split('='))), biomeId)
+      } else if (version.type === 'bedrock') {
+        return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => {
+          const [key, value] = property.split(':')
+          return [key.slice(1, -1), value.startsWith('"') ? value.slice(1, -1) : { true: 1, false: 0 }[value] ?? parseInt(value)]
+        })), biomeId)
+      }
+    }
+
     get blockEntity () {
       return this.entity ? nbt.simplify(this.entity) : undefined
     }

@@ -157,6 +157,13 @@ declare class Block {
      * @param biomeId - The biome this block is in.
      */
     static fromProperties(typeId: number | string, properties: { [key: string]: string | number }, biomeId: number): Block;
+    
+    /**
+     * Create a block from a given string.
+     * @param stateString - the string representation of a block 
+     * @param biomeId - the biome numerical id
+     */
+    static fromString(stateString: string, biomeId: number): Block;
 }
 
 /** @deprecated */
