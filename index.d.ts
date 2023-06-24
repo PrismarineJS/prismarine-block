@@ -11,7 +11,7 @@ interface Effect {
 }
 
 
-export type Shape = [number, number, number, number, number]; 
+export type Shape = [number, number, number, number, number, number]; 
 
 declare class Block {
     /**
