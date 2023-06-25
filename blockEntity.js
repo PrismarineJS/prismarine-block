@@ -44,11 +44,18 @@ module.exports = registry => {
                 }
               }
 
+              const frontText = getSideData('front_text')
               return {
                 isWaxed: this.entity.value.is_waxed.value === 1,
                 id: this.entity.value.id || 'minecraft:sign',
-                front: getSideData('front_text'),
-                back: getSideData('back_text')
+                front: frontText,
+                back: getSideData('back_text'),
+
+                // Backwards compatible API
+                Text1: frontText.lines[0],
+                Text2: frontText.lines[1],
+                Text3: frontText.lines[2],
+                Text4: frontText.lines[3]
               }
             },
 
@@ -68,6 +75,14 @@ module.exports = registry => {
             get signBackText () {
               if (!this.entity) return ''
               return this.entity.value.back_text.value.messages.value.value.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n')
+            },
+
+            // Backwards compatibility
+            get signText () {
+              return this.signFrontText
+            },
+            set signText (text) {
+              this.signFrontText = text
             }
           }
         : {
