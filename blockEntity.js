@@ -57,6 +57,7 @@ module.exports = registry => {
             },
 
             get signFrontText () {
+              if (!this.entity) return ''
               return this.entity.value.front_text.value.messages.value.value.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n')
             },
 
@@ -65,6 +66,7 @@ module.exports = registry => {
             },
 
             get signBackText () {
+              if (!this.entity) return ''
               return this.entity.value.back_text.value.messages.value.value.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n')
             }
           }
