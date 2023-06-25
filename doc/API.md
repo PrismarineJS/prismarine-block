@@ -122,7 +122,21 @@ The blocks or items dropped by that block.
 
 Some blocks may have entity data attached to them. If they do, they contain extra fields which can manipulate the entity NBT data
 
-### sign
+### sign 1.20+
+
+#### .blockEntity
+
+Returns .isWaxed, .front and .back, .front and .back contain the lines on the sign as .front.lines and .back.lines in an array of instances of prismarine-chat ChatMessage.
+
+#### get .signFrontText/.signBackText
+
+Returns a plaintext string containing the sign's text on the front or back respectively
+
+#### set .signFrontText/.signBackText
+
+Sets the text for a sign's text, can be plaintext, or array of JSON or prismarine-chat instances
+
+### sign 1.19 and before
 
 #### .blockEntity
 
