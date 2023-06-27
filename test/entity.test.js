@@ -3,7 +3,7 @@ const assert = require('assert')
 const nbt = require('prismarine-nbt')
 
 describe('handles block entities', () => {
-  for (const version of ['pc_1.15.2', 'bedrock_1.18.0']) {
+  for (const version of ['pc_1.15.2', 'bedrock_1.18.0', '1.20']) {
     const registry = require('prismarine-registry')(version)
     const Block = require('prismarine-block')(registry)
 
@@ -55,7 +55,8 @@ describe('handles block entities', () => {
         sign.signText = ['Hello', 'World']
 
         if (registry.type === 'pc') {
-          assert(sign.getSignText()[0] === 'Hello\nWorld\n\n')
+          if (registry.version['>=']('1.20')) assert(sign.getSignText()[0] === 'Hello\nWorld')
+          else assert(sign.getSignText()[0] === 'Hello\nWorld\n\n')
         }
 
         if (registry.type === 'bedrock') {
