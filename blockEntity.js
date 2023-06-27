@@ -8,7 +8,7 @@ module.exports = registry => {
       const texts = []
       if (typeof text === 'string') {
         // Sign line should look like JSON string of `{"text: "actualText"}`. Since we have plaintext, need to add in this JSON wrapper.
-        texts.push(JSON.stringify(text.split('\n').map((t) => ({ text: t }))))
+        texts.push(...text.split('\n').map((t) => (JSON.stringify({ text: t }))))
       } else if (Array.isArray(text)) {
         for (const t of text) {
           if (t.toJSON) { // prismarine-chat
@@ -23,7 +23,18 @@ module.exports = registry => {
 
       if (!block.entity) {
         block.entity = nbt.comp({
-          id: nbt.string(registry.version['>=']('1.11') ? 'minecraft:sign' : 'Sign')
+          id: nbt.string(registry.version['>=']('1.11') ? 'minecraft:sign' : 'Sign'),
+          isWaxed: nbt.byte(0),
+          back_text: nbt.comp({
+            has_glowing_text: nbt.byte(0),
+            color: nbt.string('black'),
+            messages: nbt.list(nbt.string(['{"text":""}']))
+          }),
+          front_text: nbt.comp({
+            has_glowing_text: nbt.byte(0),
+            color: nbt.string('black'),
+            messages: nbt.list(nbt.string(['{"text":""}']))
+          })
         })
       }
 
@@ -32,7 +43,7 @@ module.exports = registry => {
 
     function getSignTextForMultiSideSign (block, side) {
       if (!block.entity) return ''
-      return block.entity.value[side].value.messages.value.value.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n')
+      return block.entity?.value?.[side]?.value?.messages?.value?.value?.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n') ?? ''
     }
 
     function setSignTextForLegacySign (block, text) {
