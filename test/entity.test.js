@@ -8,8 +8,6 @@ describe('handles block entities', () => {
     const Block = require('prismarine-block')(registry)
 
     it('creates a block entity on ' + version, () => {
-      if (registry.type === 'pc') return
-
       const chest = Block.fromStateId(registry.blocksByName.chest.defaultState)
       const tag = nbt.comp({
         Items: nbt.list(nbt.comp([
@@ -34,8 +32,6 @@ describe('handles block entities', () => {
 
     describe('signs', function () {
       it('.blockEntity works on ' + version, () => {
-        if (registry.type === 'pc') return
-
         const sign = Block.fromStateId(registry.blocksByName.standing_sign?.defaultState || registry.blocksByName.oak_sign?.defaultState)
         const tag = {
           pc: nbt.comp({
