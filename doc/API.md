@@ -132,3 +132,10 @@ Sets the text for the sign, can be plaintext, or array of JSON or prismarine-cha
 #### getSignText (): [string, string?]
 
 Gets the plain text content of the sign, the first item of the array returned and the second is the back and will be undefined for versions that don't support writing on the back of signs.
+
+#### get .signText
+
+Deprecated, returns a plaintext string containing the sign's text
+
+#### set .signText
+Deprecated, sets the text for a sign's text, can be plaintext, or array of JSON or prismarine-chat instances
