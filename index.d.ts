@@ -10,6 +10,9 @@ interface Effect {
     duration: number;
 }
 
+
+export type Shape = [number, number, number, number, number, number]; 
+
 declare class Block {
     /**
      * Constructor of a block
@@ -68,7 +71,7 @@ declare class Block {
      * Each bounding box is an array of the form [xmin, ymin, zmin, xmax, ymax, zmax].
      * Depends on the type and state of the block.
      */
-    shapes: Array<Array<number>>
+    shapes: Shape[]
 
     hardness: number;
 
