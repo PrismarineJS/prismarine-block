@@ -71,7 +71,7 @@ declare class Block {
      * Each bounding box is an array of the form [xmin, ymin, zmin, xmax, ymax, zmax].
      * Depends on the type and state of the block.
      */
-    shapes: Shape[][]
+    shapes: Shape[]
 
     hardness: number;
 
