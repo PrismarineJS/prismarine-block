@@ -28,6 +28,10 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.17.0
+
+* Support for multi-sided signs (thanks @PondWader)
+
 ### 1.16.3
 
 * really
