@@ -50,7 +50,7 @@ module.exports = registry => {
       const texts = []
       if (typeof text === 'string') {
         // Sign line should look like JSON string of `{"text: "actualText"}`. Since we have plaintext, need to add in this JSON wrapper.
-        texts.push(JSON.stringify(text.split('\n').map((t) => ({ text: t }))))
+        texts.push(...(text.split('\n').map((t) => JSON.stringify({ text: t }))))
       } else if (Array.isArray(text)) {
         for (const t of text) {
           if (t.toJSON) { // prismarine-chat
