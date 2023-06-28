@@ -4,7 +4,7 @@ module.exports = registry => {
   if (registry.version.type === 'pc') {
     const ChatMessage = require('prismarine-chat')(registry.version.majorVersion)
 
-    function setSignTextForMultiSideSign (block, side, text) {
+    function signValueToJSONArray (text) {
       const texts = []
       if (typeof text === 'string') {
         // Sign line should look like JSON string of `{"text: "actualText"}`. Since we have plaintext, need to add in this JSON wrapper.
@@ -20,6 +20,11 @@ module.exports = registry => {
           }
         }
       }
+      return texts
+    }
+
+    function setSignTextForMultiSideSign (block, side, text) {
+      const texts = signValueToJSONArray(text)
 
       if (!block.entity) {
         block.entity = nbt.comp({
@@ -47,21 +52,7 @@ module.exports = registry => {
     }
 
     function setSignTextForLegacySign (block, text) {
-      const texts = []
-      if (typeof text === 'string') {
-        // Sign line should look like JSON string of `{"text: "actualText"}`. Since we have plaintext, need to add in this JSON wrapper.
-        texts.push(...(text.split('\n').map((t) => JSON.stringify({ text: t }))))
-      } else if (Array.isArray(text)) {
-        for (const t of text) {
-          if (t.toJSON) { // prismarine-chat
-            texts.push(JSON.stringify(t.toJSON()))
-          } else if (typeof t === 'object') { // normal JS object
-            texts.push(JSON.stringify(t))
-          } else { // plaintext
-            texts.push(JSON.stringify({ text: t }))
-          }
-        }
-      }
+      const texts = signValueToJSONArray(text)
 
       if (!block.entity) {
         block.entity = nbt.comp({
