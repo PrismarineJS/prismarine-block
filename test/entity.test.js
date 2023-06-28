@@ -55,8 +55,7 @@ describe('handles block entities', () => {
         sign.signText = ['Hello', 'World']
 
         if (registry.type === 'pc') {
-          if (registry.version['>=']('1.20')) assert(sign.getSignText()[0] === 'Hello\nWorld')
-          else assert(sign.getSignText()[0] === 'Hello\nWorld\n\n')
+          assert(sign.getSignText()[0] === 'Hello\nWorld')
         }
 
         if (registry.type === 'bedrock') {

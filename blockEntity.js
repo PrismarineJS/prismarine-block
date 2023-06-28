@@ -85,7 +85,7 @@ module.exports = registry => {
     function getSignTextForLegacySign (block) {
       if (!block.entity) return ''
       const texts = [block.entity.value.Text1.value, block.entity.value.Text2.value, block.entity.value.Text3.value, block.entity.value.Text4.value].map(val => val || '"')
-      return texts.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n')
+      return texts.map(text => typeof JSON.parse(text) === 'string' ? JSON.parse(text) : new ChatMessage(JSON.parse(text)).toString()).join('\n').trimEnd()
     }
 
     return {
