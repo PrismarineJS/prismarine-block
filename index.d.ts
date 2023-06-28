@@ -3,6 +3,7 @@ import { Biome } from 'prismarine-biome';
 import { NBT } from 'prismarine-nbt';
 import { NormalizedEnchant } from 'prismarine-item';
 import Registry from 'prismarine-registry';
+import { ChatMessage } from 'prismarine-chat';
 
 interface Effect {
     id: number;
@@ -112,8 +113,18 @@ declare class Block {
 
     /**
      * If the block is a sign, contains the sign text.
+     * @deprecated use getSignText() and setSignText(front, back)
      */
     signText?: string;
+
+    /**
+     * Set the text on a sign
+     */
+    setSignText: (front?: string | any[] | ChatMessage[], back?: string | any[] | ChatMessage[]) => void
+    /**
+     * Get the plain text on a sign
+     */
+    getSignText: () => [string, string?]
 
     /**
      * If the block is a painting, contains information about the painting.
