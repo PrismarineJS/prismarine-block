@@ -23,25 +23,39 @@ module.exports = registry => {
       return texts
     }
 
+    function mergeNbt(obj1, obj2) {
+      for (const [key, value] of Object.entries(obj2)) {
+          if (!(key in obj1)) {
+              obj1[key] = value 
+              continue
+          }
+  
+          if (typeof value === "object" && !Array.isArray(value)) mergeNbt(obj1[key], obj2[key])
+      }
+  }
+
     function setSignTextForMultiSideSign (block, side, text) {
       const texts = signValueToJSONArray(text)
 
       if (!block.entity) {
         block.entity = nbt.comp({
-          id: nbt.string(registry.version['>=']('1.11') ? 'minecraft:sign' : 'Sign'),
-          isWaxed: nbt.byte(0),
-          back_text: nbt.comp({
-            has_glowing_text: nbt.byte(0),
-            color: nbt.string('black'),
-            messages: nbt.list(nbt.string(['{"text":""}']))
-          }),
-          front_text: nbt.comp({
-            has_glowing_text: nbt.byte(0),
-            color: nbt.string('black'),
-            messages: nbt.list(nbt.string(['{"text":""}']))
-          })
+          id: nbt.string(registry.version['>=']('1.11') ? 'minecraft:sign' : 'Sign')
         })
       }
+
+      mergeNbt(block.entity, nbt.comp({          
+        isWaxed: nbt.byte(0),
+        back_text: nbt.comp({
+          has_glowing_text: nbt.byte(0),
+          color: nbt.string('black'),
+          messages: nbt.list(nbt.string(['{"text":""}']))
+        }),
+        front_text: nbt.comp({
+          has_glowing_text: nbt.byte(0),
+          color: nbt.string('black'),
+          messages: nbt.list(nbt.string(['{"text":""}']))
+        })
+      }))
 
       block.entity.value[side].value.messages.value.value = texts
     }
