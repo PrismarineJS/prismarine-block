@@ -23,16 +23,16 @@ module.exports = registry => {
       return texts
     }
 
-    function mergeNbt(obj1, obj2) {
+    function mergeNbt (obj1, obj2) {
       for (const [key, value] of Object.entries(obj2)) {
-          if (!(key in obj1)) {
-              obj1[key] = value 
-              continue
-          }
-  
-          if (typeof value === "object" && !Array.isArray(value)) mergeNbt(obj1[key], obj2[key])
+        if (!(key in obj1)) {
+          obj1[key] = value
+          continue
+        }
+
+        if (typeof value === 'object' && !Array.isArray(value)) mergeNbt(obj1[key], obj2[key])
       }
-  }
+    }
 
     function setSignTextForMultiSideSign (block, side, text) {
       const texts = signValueToJSONArray(text)
@@ -43,7 +43,7 @@ module.exports = registry => {
         })
       }
 
-      mergeNbt(block.entity, nbt.comp({          
+      mergeNbt(block.entity, nbt.comp({
         isWaxed: nbt.byte(0),
         back_text: nbt.comp({
           has_glowing_text: nbt.byte(0),
