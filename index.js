@@ -327,7 +327,7 @@ function provider (registry, { Biome, version, features }) {
       }
 
       // Compute block breaking delta (breaking progress applied in a single tick)
-      const blockHardness = this.hardness
+      const blockHardness = (this.hardness > 0 && this.hardness < 1) ? 1 : this.hardness
       const matchingToolMultiplier = this.canHarvest(heldItemType) ? 30.0 : 100.0
 
       let blockBreakingDelta = blockBreakingSpeed / blockHardness / matchingToolMultiplier
