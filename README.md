@@ -14,10 +14,10 @@ const stoneBlock = new Block(registry.blocksByName.stone, registry.biomesByName.
 
 console.log(stoneBlock)
 
-// can you harvest stone with an iron pickaxe ?
+// can you harvest stone with an iron pickaxe?
 console.log(stoneBlock.canHarvest(257))
 
-// how many milliseconds does it takes in usual conditions ? (on ground, not in water and not in creative mode)
+// how many milliseconds does it takes in usual conditions? (on ground, not in water and not in creative mode)
 console.log(stoneBlock.digTime(257))
 
 ```
@@ -27,6 +27,27 @@ console.log(stoneBlock.digTime(257))
 See [doc/API.md](doc/API.md)
 
 ## History
+
+### 1.17.0
+
+* Support for multi-sided signs (thanks @PondWader)
+
+### 1.16.3
+
+* really
+
+### 1.16.2
+
+* correct
+
+### 1.16.1
+
+* fix mcdata dep
+
+### 1.15.0
+
+* Effect names were normalized
+* Metadata to 0 by default
 
 ### 1.14.1
 

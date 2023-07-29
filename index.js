@@ -1,5 +1,5 @@
 module.exports = loader
-module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4', '1.17.1', '1.18.1', 'bedrock_1.17.10', 'bedrock_1.18.0']
+module.exports.testedVersions = ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.4', '1.17.1', '1.18.1', 'bedrock_1.17.10', 'bedrock_1.18.0', '1.20']
 
 const nbt = require('prismarine-nbt')
 const mcData = require('minecraft-data')
@@ -23,8 +23,6 @@ const legacyPcBlocksByIdmeta = Object.entries(mcData.legacy.pc.blocks).reduce((o
 
 function loader (registryOrVersion) {
   const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
-  const mcVersion = registry.version.type === 'bedrock' ? 'bedrock_' + registry.version.majorVersion : registry.version.minecraftVersion // until prismarine-biome supports registry
-
   const version = registry.version
   return provider(registry, { Biome: require('prismarine-biome')(mcVersion), version })
 }
@@ -110,15 +108,13 @@ function provider (registry, { Biome, version }) {
   return class Block {
     constructor (type, biomeId, metadata, stateId) {
       this.type = type
-      this.metadata = metadata
+      this.metadata = metadata ?? 0
       this.light = 0
       this.skyLight = 0
       this.biome = new Biome(biomeId)
       this.position = null
       this.stateId = stateId
       this.computedStates = {}
-
-      if (this.metadata == null) this.metadata = 0
 
       if (stateId === undefined && type !== undefined) {
         const b = registry.blocks[type]
@@ -181,6 +177,12 @@ function provider (registry, { Biome, version }) {
           }
         } else {
           this._properties = legacyPcBlocksByIdmeta[this.type + ':' + this.metadata] || legacyPcBlocksByIdmeta[this.type + ':0']
+          if (!this._properties) { // If no props, try different metadata for type match only
+            for (let i = 0; i < 15; i++) {
+              this._properties = legacyPcBlocksByIdmeta[this.type + ':' + i]
+              if (this._properties) break
+            }
+          }
         }
       } else if (version.type === 'bedrock') {
         const states = registry.blockStates?.[this.stateId]?.states || {}
@@ -239,6 +241,20 @@ function provider (registry, { Biome, version }) {
           return new Block(undefined, biomeId, 0, stateId)
         }
         return block
+      }
+    }
+
+    static fromString (str, biomeId) {
+      if (str.startsWith('minecraft:')) str = str.substring(10)
+      const name = str.split('[', 1)[0]
+      const propertiesStr = str.slice(name.length + 1, -1).split(',')
+      if (version.type === 'pc') {
+        return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => property.split('='))), biomeId)
+      } else if (version.type === 'bedrock') {
+        return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => {
+          const [key, value] = property.split(':')
+          return [key.slice(1, -1), value.startsWith('"') ? value.slice(1, -1) : { true: 1, false: 0 }[value] ?? parseInt(value)]
+        })), biomeId)
       }
     }
 

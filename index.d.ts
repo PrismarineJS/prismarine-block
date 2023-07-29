@@ -3,12 +3,16 @@ import { Biome } from 'prismarine-biome';
 import { NBT } from 'prismarine-nbt';
 import { NormalizedEnchant } from 'prismarine-item';
 import Registry from 'prismarine-registry';
+import { ChatMessage } from 'prismarine-chat';
 
 interface Effect {
     id: number;
     amplifier: number;
     duration: number;
 }
+
+
+export type Shape = [number, number, number, number, number, number]; 
 
 declare class Block {
     /**
@@ -68,7 +72,7 @@ declare class Block {
      * Each bounding box is an array of the form [xmin, ymin, zmin, xmax, ymax, zmax].
      * Depends on the type and state of the block.
      */
-    shapes: Array<Array<number>>
+    shapes: Shape[]
 
     hardness: number;
 
@@ -109,8 +113,18 @@ declare class Block {
 
     /**
      * If the block is a sign, contains the sign text.
+     * @deprecated use getSignText() and setSignText(front, back)
      */
     signText?: string;
+
+    /**
+     * Set the text on a sign
+     */
+    setSignText: (front?: string | any[] | ChatMessage[], back?: string | any[] | ChatMessage[]) => void
+    /**
+     * Get the plain text on a sign
+     */
+    getSignText: () => [string, string?]
 
     /**
      * If the block is a painting, contains information about the painting.
@@ -135,7 +149,7 @@ declare class Block {
     /**
      * Parse the block state and return its properties.
      */
-    getProperties() : { [key: string]: string | number }
+    getProperties() : { [key: string]: string | number | boolean };
 
     /**
      * Tells you how long it will take to dig the block, in milliseconds.
@@ -156,9 +170,18 @@ declare class Block {
      * @param properties - A dictionary of block states to build from.
      * @param biomeId - The biome this block is in.
      */
-    static fromProperties(typeId: number, properties: { [key: string]: string | number }, biomeId: number): Block;
+    static fromProperties(typeId: number | string, properties: { [key: string]: string | number }, biomeId: number): Block;
+    
+    /**
+     * Create a block from a given string.
+     * @param stateString - the string representation of a block 
+     * @param biomeId - the biome numerical id
+     */
+    static fromString(stateString: string, biomeId: number): Block;
 }
 
 /** @deprecated */
-export declare function loader(mcVersion: string): typeof Block;
-export declare function loader(registry: ReturnType<typeof Registry>): typeof Block;
+function loader(mcVersion: string): typeof Block;
+function loader(registry: ReturnType<typeof Registry>): typeof Block;
+
+export = loader

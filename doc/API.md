@@ -2,6 +2,11 @@
 
 #### Block.fromStateId(stateId, biomeId)
 
+#### Block.fromString(stateString, biomeId)
+
+* `stateString` is the string representation of a block
+* `biomeId` is the biome numerical id
+
 #### Block(type,biomeId,metadata)
 
 Constructor of a block
@@ -119,14 +124,18 @@ Some blocks may have entity data attached to them. If they do, they contain extr
 
 ### sign
 
-#### .blockEntity
+#### setSignText (front, back) 
 
-Returns 4 fields with .Text1, .Text2, .Text3, .Text4 each containing instances of prismarine-chat ChatMessage, if a block entity exists for the sign.
+Sets the text for the sign, can be plaintext, or array of JSON or prismarine-chat instances.
+
+
+#### getSignText (): [string, string?]
+
+Gets the plain text content of the sign, the first item of the array returned and the second is the back and will be undefined for versions that don't support writing on the back of signs.
 
 #### get .signText
 
-Returns a plaintext string containing the sign's text
+Deprecated, returns a plaintext string containing the sign's text
 
 #### set .signText
-
-Sets the text for a sign's text, can be plaintext, or array of JSON or prismarine-chat instances
+Deprecated, sets the text for a sign's text, can be plaintext, or array of JSON or prismarine-chat instances

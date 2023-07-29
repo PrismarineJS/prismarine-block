@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-const expect = require('expect')
+const expect = require('expect').default
 
 // https://minecraft.gamepedia.com/Breaking#Blocks_by_hardness
 describe('Dig time', () => {
@@ -25,7 +25,7 @@ describe('Dig time', () => {
     })
   })
 
-  for (const version of ['1.17', 'bedrock_1.17.10', 'bedrock_1.18.0']) {
+  for (const version of ['1.17', 'bedrock_1.17.10', 'bedrock_1.18.0', '1.20']) {
     describe(version, () => {
       const registry = require('prismarine-registry')(version)
       const Block = require('prismarine-block')(registry)
@@ -161,5 +161,19 @@ describe('Dig time', () => {
         })
       })
     })
+  }
+})
+
+describe('fromString', () => {
+  const versions = {
+    1.18: 'minecraft:candle[lit=true]',
+    'pe_1.18.0': 'minecraft:candle["lit":true]',
+    '1.20': 'minecraft:candle[lit=true]'
+  }
+  for (const [version, str] of Object.entries(versions)) {
+    const Block = require('prismarine-block')(version)
+    const block = Block.fromString(str, 0)
+    console.log(block)
+    expect(block.getProperties().lit).toBeTruthy()
   }
 })
