@@ -24,7 +24,7 @@ const legacyPcBlocksByIdmeta = Object.entries(mcData.legacy.pc.blocks).reduce((o
 function loader (registryOrVersion) {
   const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
   const version = registry.version
-  return provider(registry, { Biome: require('prismarine-biome')(mcVersion), version })
+  return provider(registry, { Biome: require('prismarine-biome')(version), version })
 }
 
 function provider (registry, { Biome, version }) {
