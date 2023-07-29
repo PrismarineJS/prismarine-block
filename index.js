@@ -24,16 +24,12 @@ const legacyPcBlocksByIdmeta = Object.entries(mcData.legacy.pc.blocks).reduce((o
 function loader (registryOrVersion) {
   const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
   const version = registry.version
-  const features = {
-    usesBlockStates: (version.type === 'pc' && version['>=']('1.13')) || (version.type === 'bedrock'),
-    effectNamesMatchRegistryName: version['>=']('1.17')
-  }
-
-  return provider(registry, { Biome: require('prismarine-biome')(registry), features, version })
+  return provider(registry, { Biome: require('prismarine-biome')(version), version })
 }
 
-function provider (registry, { Biome, version, features }) {
+function provider (registry, { Biome, version }) {
   const blockMethods = require('./blockEntity')(registry)
+  const usesBlockStates = (version.type === 'pc' && registry.supportFeature('blockStateId')) || (version.type === 'bedrock')
   const shapes = registry.blockCollisionShapes
   if (shapes) {
     // Prepare block shapes
@@ -169,7 +165,7 @@ function provider (registry, { Biome, version, features }) {
 
       this._properties = {}
       if (version.type === 'pc') {
-        if (features.usesBlockStates) {
+        if (usesBlockStates) {
           const blockEnum = registry.blocksByStateId[this.stateId]
           if (blockEnum && blockEnum.states) {
             let data = this.metadata
@@ -203,7 +199,7 @@ function provider (registry, { Biome, version, features }) {
 
     static fromStateId (stateId, biomeId) {
       // 1.13+: metadata is completely removed and only block state IDs are used
-      if (features.usesBlockStates) {
+      if (usesBlockStates) {
         return new Block(undefined, biomeId, 0, stateId)
       } else {
         return new Block(stateId >> 4, biomeId, stateId & 15, stateId)
