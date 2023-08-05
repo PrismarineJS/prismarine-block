@@ -13,10 +13,10 @@ const legacyPcBlocksByIdmeta = Object.entries(mcData.legacy.pc.blocks).reduce((o
   const s = name.split('[')[1]?.replace(']', '')
   obj[idmeta] = s
     ? Object.fromEntries(s.split(',').map(s => {
-        let [k, v] = s.split('=')
-        if (!isNaN(parseInt(v))) v = parseInt(v)
-        return [k, v]
-      }))
+      let [k, v] = s.split('=')
+      if (!isNaN(parseInt(v))) v = parseInt(v)
+      return [k, v]
+    }))
     : {}
   return obj // array of { '255:0': { mode: 'save' }, }
 }, {})
