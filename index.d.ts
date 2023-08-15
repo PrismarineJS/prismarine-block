@@ -14,7 +14,7 @@ interface Effect {
 
 export type Shape = [number, number, number, number, number, number]; 
 
-declare class Block {
+export declare class Block {
     /**
      * Constructor of a block
      * @param type is the block numerical id
