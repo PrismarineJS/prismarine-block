@@ -28,6 +28,12 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.17.1
+* [Export Block class declaration (#91)](https://github.com/PrismarineJS/prismarine-block/commit/06ef318525aa92b57b400e0ee899231a4a737bec) (thanks @IceTank)
+* [Bump standard from 16.0.4 to 17.1.0 (#83)](https://github.com/PrismarineJS/prismarine-block/commit/00cb8a9a6b810f1bcf7a6482b9a25554d7c39a70) (thanks @dependabot[bot])
+* [use nmd supportFeature (#60)](https://github.com/PrismarineJS/prismarine-block/commit/83a74fc3877197a6383665f7e121081e54f36e86) (thanks @u9g)
+* [Add command gh workflow allowing to use release command in comments (#90)](https://github.com/PrismarineJS/prismarine-block/commit/e9955a02d44570111ad0f72c52e61c3b1f5be72f) (thanks @rom1504)
+
 ### 1.17.0
 
 * Support for multi-sided signs (thanks @PondWader)
