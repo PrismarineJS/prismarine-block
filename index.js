@@ -248,9 +248,9 @@ function provider (registry, { Biome, version }) {
       if (str.startsWith('minecraft:')) str = str.substring(10)
       const name = str.split('[', 1)[0]
       const propertiesStr = str.slice(name.length + 1, -1).split(',')
-      if (version.type === 'pc') {
+      if (!str.includes('["')) {
         return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => property.split('='))), biomeId)
-      } else if (version.type === 'bedrock') {
+      } else {
         return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => {
           const [key, value] = property.split(':')
           return [key.slice(1, -1), value.startsWith('"') ? value.slice(1, -1) : { true: 1, false: 0 }[value] ?? parseInt(value)]
