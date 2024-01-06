@@ -249,8 +249,11 @@ function provider (registry, { Biome, version }) {
       const name = str.split('[', 1)[0]
       const propertiesStr = str.slice(name.length + 1, -1).split(',')
       if (!str.includes('["')) {
+        // Example state: `minecraft:candle[lit=true]` -> candle, {lit: "true"}
         return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => property.split('='))), biomeId)
       } else {
+        // Kept for backwards compatibility
+        // Example state: `minecraft:candle["lit":true]` -> candle, {lit: 1}
         return Block.fromProperties(name, Object.fromEntries(propertiesStr.map(property => {
           const [key, value] = property.split(':')
           return [key.slice(1, -1), value.startsWith('"') ? value.slice(1, -1) : { true: 1, false: 0 }[value] ?? parseInt(value)]
