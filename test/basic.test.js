@@ -168,6 +168,7 @@ describe('fromString', () => {
   const versions = {
     1.18: 'minecraft:candle[lit=true]',
     'pe_1.18.0': 'minecraft:candle["lit":true]',
+    1.19: 'minecraft:candle["lit":true]',
     '1.20': 'minecraft:candle[lit=true]'
   }
   for (const [version, str] of Object.entries(versions)) {
