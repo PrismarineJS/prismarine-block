@@ -383,6 +383,15 @@ function provider (registry, { Biome, version }) {
     return 0
   }
 
+  function getHashValue (states, name) {
+    const tag = nbt.comp({
+      name: { type: 'string', value: name },
+      states: nbt.comp(states)
+    })
+    const s = nbt.writeUncompressed(tag, 'little').toString()
+    return fnv1a32(s)
+  }
+
   function propValue (state, value) {
     if (state.type === 'enum' || state.values) return state.values[value]
     if (state.type === 'bool') return !value
@@ -392,4 +401,16 @@ function provider (registry, { Biome, version }) {
 
 function mergeObject (to, from) {
   Object.defineProperties(to, Object.getOwnPropertyDescriptors(from))
+}
+
+function fnv1a32 (s) {
+  // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function#FNV_hash_parameters
+  const FNV1_OFFSET_32 = 0x811c9dc5
+  let h = FNV1_OFFSET_32
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i) & 0xff
+    h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24)
+  }
+
+  return h & h
 }
