@@ -269,6 +269,10 @@ function provider (registry, { Biome, version }) {
       return Object.assign(this._properties, this.computedStates)
     }
 
+    getHash () {
+      return getHashValue(registry.blockStates[this.stateId].states, this.name)
+    }
+
     canHarvest (heldItemType) {
       if (!this.harvestTools) { return true }; // for blocks harvestable by hand
       return heldItemType && this.harvestTools && this.harvestTools[heldItemType]
