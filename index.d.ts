@@ -11,6 +11,7 @@ interface Effect {
     duration: number;
 }
 
+type States = { [key: string]: string | number }
 
 export type Shape = [number, number, number, number, number, number]; 
 
@@ -41,6 +42,9 @@ export declare class Block {
     // Only set if this block is an actual entity (or has an entity component to it)
     // Contains a full NBT, unserialized object
     entity: NBT | null;
+
+    // (Bedrock Edition) A hash to uniquely represent block name and properties
+    hash?: number
 
     /**
      * A biome instance.
@@ -175,7 +179,7 @@ export declare class Block {
      * @param properties - A dictionary of block states to build from.
      * @param biomeId - The biome this block is in.
      */
-    static fromProperties(typeId: number | string, properties: { [key: string]: string | number }, biomeId: number): Block;
+    static fromProperties(typeId: number | string, properties: States, biomeId: number): Block;
     
     /**
      * Create a block from a given string.
@@ -183,6 +187,13 @@ export declare class Block {
      * @param biomeId - the biome numerical id
      */
     static fromString(stateString: string, biomeId: number): Block;
+
+    /**
+     * (Bedrock Edition) Returns an integer hash to reperesent the block state
+     * @param name name of the block, with a minecraft: prefix
+     * @param states a record of block state properties
+     */
+    static getHash(prefixedName: string, states: States): number | undefined
 }
 
 /** @deprecated */
