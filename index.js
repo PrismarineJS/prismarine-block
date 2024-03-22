@@ -195,6 +195,10 @@ function provider (registry, { Biome, version }) {
       if (this.name.includes('sign')) {
         mergeObject(this, blockMethods.sign)
       }
+
+      if (blockEnum && registry.supportFeature('blockHashes')) {
+        this.hash = Block.getHash(this.name, this._properties)
+      }
     }
 
     static fromStateId (stateId, biomeId) {
@@ -271,8 +275,15 @@ function provider (registry, { Biome, version }) {
       return Object.assign(this._properties, this.computedStates)
     }
 
-    getHash () {
-      return getHashValue(registry.blockStates[this.stateId].states, this.name)
+    static getHash (name, states) {
+      if (registry.supportFeature('blockHashes')) {
+        const tag = nbt.comp({
+          name: { type: 'string', value: name.includes(':') ? name : `minecraft:${name}` },
+          states: nbt.comp(states)
+        })
+        const buf = nbt.writeUncompressed(tag, 'little')
+        return computeFnv1a32Hash(buf)
+      }
     }
 
     canHarvest (heldItemType) {
@@ -387,15 +398,6 @@ function provider (registry, { Biome, version }) {
     return 0
   }
 
-  function getHashValue (states, name) {
-    const tag = nbt.comp({
-      name: { type: 'string', value: name },
-      states: nbt.comp(states)
-    })
-    const s = nbt.writeUncompressed(tag, 'little').toString()
-    return fnv1a32(s)
-  }
-
   function propValue (state, value) {
     if (state.type === 'enum' || state.values) return state.values[value]
     if (state.type === 'bool') return !value
@@ -407,14 +409,12 @@ function mergeObject (to, from) {
   Object.defineProperties(to, Object.getOwnPropertyDescriptors(from))
 }
 
-function fnv1a32 (s) {
-  // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function#FNV_hash_parameters
+function computeFnv1a32Hash (buf) {
   const FNV1_OFFSET_32 = 0x811c9dc5
   let h = FNV1_OFFSET_32
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i) & 0xff
+  for (let i = 0; i < buf.length; i++) {
+    h ^= buf[i] & 0xff
     h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24)
   }
-
-  return h & h
+  return h
 }
