@@ -181,8 +181,8 @@ describe('Block hash computation', () => {
   for (const version of ['bedrock_1.20.0']) {
     const Block = require('prismarine-block')(version)
     it(version, function () {
-      const block = Block.fromString('minecraft:soul_sand', 0)
-      expect(block.hash).toBe(-1289874924)
+      const block = Block.fromString('minecraft:soul_soil', 0)
+      expect(block.hash).toBe(601701031)
     })
   }
 })

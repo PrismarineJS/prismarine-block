@@ -416,5 +416,5 @@ function computeFnv1a32Hash (buf) {
     h ^= buf[i] & 0xff
     h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24)
   }
-  return h
+  return h & h
 }
