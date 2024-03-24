@@ -156,11 +156,6 @@ export declare class Block {
     getProperties() : { [key: string]: string | number | boolean };
 
     /**
-     * Parse the block state and return its properties.
-     */
-    getHash() : number;
-
-    /**
      * Tells you how long it will take to dig the block, in milliseconds.
      * @param heldItemType the id of the held item (or null if nothing is held)
      * @param creative is the bot in gamemode creative?
