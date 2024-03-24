@@ -277,9 +277,13 @@ function provider (registry, { Biome, version }) {
 
     static getHash (name, states) {
       if (registry.supportFeature('blockHashes')) {
+        const sortedStates = {}
+        for (const key of Object.keys(states).sort()) {
+          sortedStates[key] = states[key]
+        }
         const tag = nbt.comp({
           name: { type: 'string', value: name.includes(':') ? name : `minecraft:${name}` },
-          states: nbt.comp(states)
+          states: nbt.comp(sortedStates)
         })
         const buf = nbt.writeUncompressed(tag, 'little')
         return computeFnv1a32Hash(buf)
