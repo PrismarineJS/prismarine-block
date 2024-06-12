@@ -209,6 +209,8 @@ function provider (registry, { Biome, version }) {
     static fromProperties (typeId, properties, biomeId) {
       const block = typeof typeId === 'string' ? registry.blocksByName[typeId] : registry.blocks[typeId]
 
+      if (!block) throw new Error('No matching block id found for ' + typeId + ' with properties ' + JSON.stringify(properties)) // This should not happen
+
       if (version.type === 'pc') {
         if (block.states) {
           let data = 0
@@ -359,8 +361,8 @@ function provider (registry, { Biome, version }) {
       return state.values.indexOf(value)
     }
     if (state.type === 'bool') {
-      if (value === true) return 0
-      if (value === false) return 1
+      if (value === true || value === 'true') return 0
+      if (value === false || value === 'false') return 1
     }
     if (state.type === 'int') {
       return value

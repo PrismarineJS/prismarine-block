@@ -130,7 +130,6 @@ describe('Dig time', () => {
           it('using iron_shovel', () => {
             const tool = registry.itemsByName[toolName]
             const block = Block.fromStateId(registry.blocksByName[blockName].defaultState)
-            console.log('Block', block)
             const time = block.digTime(tool.id, false, false, false, [], {})
             expect(time).toBe(750)
           })
@@ -174,7 +173,6 @@ describe('fromString', () => {
   for (const [version, str] of Object.entries(versions)) {
     const Block = require('prismarine-block')(version)
     const block = Block.fromString(str, 0)
-    console.log(block)
     expect(block.getProperties().lit).toBeTruthy()
   }
 })

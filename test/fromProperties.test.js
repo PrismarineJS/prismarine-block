@@ -4,6 +4,7 @@ const assert = require('assert')
 const testedVersions = require('..').testedVersions
 
 describe('Block From Properties', () => {
+  // PC (Java)
   it('spruce half slab: waterlogged, upper (pc_1.16.4)', () => {
     const registry = require('prismarine-registry')('1.16.4')
     const Block = require('prismarine-block')(registry)
@@ -14,6 +15,18 @@ describe('Block From Properties', () => {
     expect(block.stateId).toBe(8310)
     expect(block.getProperties()).toMatchObject(properties)
   })
+  it('Boolean properties are string (1.18.2, ...)', () => {
+    const registry = require('prismarine-registry')('1.18.2')
+    const Block = require('prismarine-block')(registry)
+    const signId = registry.blocksByName.oak_sign.id
+    const sourceProperties = { waterlogged: 'false', rotation: '8' }
+
+    const block = Block.fromProperties(signId, sourceProperties, 0)
+    expect(block.stateId).toBe(3455)
+    expect(block.getProperties()).toMatchObject({ waterlogged: false, rotation: 8 })
+  })
+
+  // Bedrock
   it('spruce half slab: waterlogged, upper (bedrock_1.17.10)', () => {
     const registry = require('prismarine-registry')('bedrock_1.17.10')
     const Block = require('prismarine-block')(registry)
