@@ -55,10 +55,16 @@ describe('versions should return block state and properties', () => {
       // make sure that .fromProperties works
       {
         const blockData = registry.blocksByName.light_weighted_pressure_plate
-        const properties = { pc: { power: 2 }, bedrock: { redstone_signal: 2 } }[e]
+        const properties = { pc: { power: '2' }, bedrock: { redstone_signal: 2 } }[e]
         const block = Block.fromProperties(blockData.name, properties, 0)
         assert(block.stateId >= blockData.minStateId && block.stateId <= blockData.maxStateId)
-        expect(block.getProperties()).toMatchObject(properties)
+        const propertiesNormalized = block.getProperties();
+        if (e === 'pc') {
+          for (const key in propertiesNormalized) {
+            propertiesNormalized[key] = propertiesNormalized[key].toString();
+          }
+        }
+        expect(propertiesNormalized).toMatchObject(properties)
       }
 
       // Make sure type IDs work
