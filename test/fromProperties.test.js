@@ -58,10 +58,10 @@ describe('versions should return block state and properties', () => {
         const properties = { pc: { power: '2' }, bedrock: { redstone_signal: 2 } }[e]
         const block = Block.fromProperties(blockData.name, properties, 0)
         assert(block.stateId >= blockData.minStateId && block.stateId <= blockData.maxStateId)
-        const propertiesNormalized = block.getProperties();
+        const propertiesNormalized = block.getProperties()
         if (e === 'pc') {
           for (const key in propertiesNormalized) {
-            propertiesNormalized[key] = propertiesNormalized[key].toString();
+            propertiesNormalized[key] = propertiesNormalized[key].toString()
           }
         }
         expect(propertiesNormalized).toMatchObject(properties)
