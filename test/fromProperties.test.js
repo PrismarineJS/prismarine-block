@@ -4,6 +4,7 @@ const assert = require('assert')
 const testedVersions = require('..').testedVersions
 
 describe('Block From Properties', () => {
+  // PC (Java)
   it('spruce half slab: waterlogged, upper (pc_1.16.4)', () => {
     const registry = require('prismarine-registry')('1.16.4')
     const Block = require('prismarine-block')(registry)
@@ -14,6 +15,18 @@ describe('Block From Properties', () => {
     expect(block.stateId).toBe(8310)
     expect(block.getProperties()).toMatchObject(properties)
   })
+  it('Boolean properties are string (1.18.2, ...)', () => {
+    const registry = require('prismarine-registry')('1.18.2')
+    const Block = require('prismarine-block')(registry)
+    const signId = registry.blocksByName.oak_sign.id
+    const sourceProperties = { waterlogged: 'false', rotation: '8' }
+
+    const block = Block.fromProperties(signId, sourceProperties, 0)
+    expect(block.stateId).toBe(3455)
+    expect(block.getProperties()).toMatchObject({ waterlogged: false, rotation: 8 })
+  })
+
+  // Bedrock
   it('spruce half slab: waterlogged, upper (bedrock_1.17.10)', () => {
     const registry = require('prismarine-registry')('bedrock_1.17.10')
     const Block = require('prismarine-block')(registry)
@@ -42,10 +55,16 @@ describe('versions should return block state and properties', () => {
       // make sure that .fromProperties works
       {
         const blockData = registry.blocksByName.light_weighted_pressure_plate
-        const properties = { pc: { power: 2 }, bedrock: { redstone_signal: 2 } }[e]
+        const properties = { pc: { power: '2' }, bedrock: { redstone_signal: 2 } }[e]
         const block = Block.fromProperties(blockData.name, properties, 0)
         assert(block.stateId >= blockData.minStateId && block.stateId <= blockData.maxStateId)
-        expect(block.getProperties()).toMatchObject(properties)
+        const propertiesNormalized = block.getProperties()
+        if (e === 'pc') {
+          for (const key in propertiesNormalized) {
+            propertiesNormalized[key] = propertiesNormalized[key].toString()
+          }
+        }
+        expect(propertiesNormalized).toMatchObject(properties)
       }
 
       // Make sure type IDs work
