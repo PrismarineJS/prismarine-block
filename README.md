@@ -28,6 +28,11 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.18.0
+* [Fix false value handling in fromProperties for post flatenning versions (#98)](https://github.com/PrismarineJS/prismarine-block/commit/1514a1dcd12984016a5fd360009dd3811ae54f66) (thanks @zardoy)
+* [fix version used in block entity (#99)](https://github.com/PrismarineJS/prismarine-block/commit/05aed2ecee7f427b332b0682618368e61c45e1eb) (thanks @rom1504)
+* [Allow two variations of syntax in fromString (#96)](https://github.com/PrismarineJS/prismarine-block/commit/52fda556ca39d5d3848ddea297c1409b615301d8) (thanks @Flonja)
+
 ### 1.17.1
 * [Export Block class declaration (#91)](https://github.com/PrismarineJS/prismarine-block/commit/06ef318525aa92b57b400e0ee899231a4a737bec) (thanks @IceTank)
 * [Bump standard from 16.0.4 to 17.1.0 (#83)](https://github.com/PrismarineJS/prismarine-block/commit/00cb8a9a6b810f1bcf7a6482b9a25554d7c39a70) (thanks @dependabot[bot])
