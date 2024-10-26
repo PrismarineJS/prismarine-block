@@ -2,7 +2,7 @@ const nbt = require('prismarine-nbt')
 
 module.exports = registry => {
   if (registry.version.type === 'pc') {
-    const ChatMessage = require('prismarine-chat')(registry.version.majorVersion)
+    const ChatMessage = require('prismarine-chat')(registry.version.minecraftVersion)
 
     function signValueToJSONArray (text) {
       const texts = []
