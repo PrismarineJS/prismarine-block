@@ -28,6 +28,9 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.19.0
+* [Update npm-publish.yml](https://github.com/PrismarineJS/prismarine-block/commit/faed7f0390d3f4fd0b15e24193463ed111dbc69a) (thanks @rom1504)
+
 ### 1.18.0
 * [Fix false value handling in fromProperties for post flatenning versions (#98)](https://github.com/PrismarineJS/prismarine-block/commit/1514a1dcd12984016a5fd360009dd3811ae54f66) (thanks @zardoy)
 * [fix version used in block entity (#99)](https://github.com/PrismarineJS/prismarine-block/commit/05aed2ecee7f427b332b0682618368e61c45e1eb) (thanks @rom1504)
