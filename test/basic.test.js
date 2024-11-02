@@ -4,6 +4,46 @@ const expect = require('expect').default
 
 // https://minecraft.gamepedia.com/Breaking#Blocks_by_hardness
 describe('Dig time', () => {
+  describe('1.20.5', () => {
+    const registry = require('prismarine-registry')('1.20.5')
+    const Block = require('prismarine-block')(registry)
+    it('dig dirt (shovel faster than hand)', () => {
+      const dirt = Block.fromStateId(registry.blocksByName.dirt.defaultState, 0)
+      const shovel = registry.itemsByName.iron_shovel
+      const handTime = dirt.digTime(null, false, false, false)
+      const shovelTime = dirt.digTime(shovel.id, false, false, false)
+      expect(shovelTime < handTime).toBeTruthy()
+    })
+
+    it('mine stone (pickaxe faster than hand)', () => {
+      const stone = Block.fromStateId(registry.blocksByName.stone.defaultState, 0)
+      const pickaxe = registry.itemsByName.iron_pickaxe
+      const handTime = stone.digTime(null, false, false, false)
+      const pickaxeTime = stone.digTime(pickaxe.id, false, false, false)
+      expect(pickaxeTime < handTime).toBeTruthy()
+    })
+  })
+
+  describe('1.20.4', () => {
+    const registry = require('prismarine-registry')('1.20.4')
+    const Block = require('prismarine-block')(registry)
+    it('dig dirt (shovel faster than hand)', () => {
+      const dirt = Block.fromStateId(registry.blocksByName.dirt.defaultState, 0)
+      const shovel = registry.itemsByName.iron_shovel
+      const handTime = dirt.digTime(null, false, false, false)
+      const shovelTime = dirt.digTime(shovel.id, false, false, false)
+      expect(shovelTime < handTime).toBeTruthy()
+    })
+
+    it('mine stone (pickaxe faster than hand)', () => {
+      const stone = Block.fromStateId(registry.blocksByName.stone.defaultState, 0)
+      const pickaxe = registry.itemsByName.iron_pickaxe
+      const handTime = stone.digTime(null, false, false, false)
+      const pickaxeTime = stone.digTime(pickaxe.id, false, false, false)
+      expect(pickaxeTime < handTime).toBeTruthy()
+    })
+  })
+
   describe('1.15.2', () => {
     const registry = require('prismarine-registry')('1.15.2')
     const Block = require('prismarine-block')(registry)
