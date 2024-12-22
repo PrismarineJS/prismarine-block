@@ -184,7 +184,6 @@ function provider (registry, { Biome, version }) {
               if (this._properties) break
             }
           }
-          if (!this._properties) console.log('** NO BLOCK DATA FOR', [this.type, this.metadata])
           this._properties ??= {}
         }
       } else if (version.type === 'bedrock') {
