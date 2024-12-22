@@ -89,6 +89,9 @@ export declare class Block {
      */
     diggable: boolean;
 
+    // Whether the block's state is currently waterlogged. This is only possible since [the aqatic update](https://minecraft.wiki/w/Update_Aquatic).
+    isWaterlogged?: boolean
+
     /**
      * This tells what types of tools will be effective against the block.
      * Possible values are: null, rock, wood, plant, melon, leaves, dirt, web, and wool.
