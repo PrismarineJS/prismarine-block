@@ -7,12 +7,19 @@
 * `stateString` is the string representation of a block
 * `biomeId` is the biome numerical id
 
-#### Block(type,biomeId,metadata)
+#### Block.fromProperties(typeId, properties, biomeId)
+
+* `typeId` - The block type ID (numerical or string)
+* `properties` - A dictionary of block state properties to build from
+* `biomeId` - The biome numerical id
+
+#### Block(type, biomeId, metadata, stateId = null)
 
 Constructor of a block
 * `type` is the block numerical id
 * `biomeId` is the biome numerical id
 * `metadata` is the metadata numerical value
+* `stateId` (optional) represents the state of the block (same as metadata in newer versions)
 
 #### block.canHarvest(heldItemType)
 
@@ -45,7 +52,11 @@ Numerical id.
 
 #### block.name
 
+Minecraft ID (string) of the block.
+
 #### block.displayName
+
+Display name of the block.
 
 #### block.shapes
 
@@ -53,7 +64,7 @@ Array of bounding boxes representing the block shape. Each bounding box is an ar
 
 #### block.entity
 
-If this block is a block entity, this contains the NBT data for the entity
+If this block is a block entity, this contains the NBT data for the entity.
 
 #### block.blockEntity
 
@@ -93,7 +104,7 @@ Boolean, whether the block is considered diggable.
 
 #### block.boundingBox
 
-The shape of the block according to the physics engine's collision decection. Currently one of:
+The shape of the block according to the physics engine's collision detection. Currently one of:
 
  * `block` - currently, partially solid blocks, such as half-slabs and ladders, are considered entirely solid.
  * `empty` - such as flowers and lava.
@@ -131,11 +142,12 @@ Sets the text for the sign, can be plaintext, or array of JSON or prismarine-cha
 
 #### getSignText (): [string, string?]
 
-Gets the plain text content of the sign, the first item of the array returned and the second is the back and will be undefined for versions that don't support writing on the back of signs.
+Gets the plain text content of the sign. The first item of the array returned and the second is the back, which will be undefined for versions that don't support writing on the back of signs.
 
 #### get .signText
 
-Deprecated, returns a plaintext string containing the sign's text
+Deprecated, returns a plaintext string containing the sign's text.
 
 #### set .signText
-Deprecated, sets the text for a sign's text, can be plaintext, or array of JSON or prismarine-chat instances
+
+Deprecated, sets the text for a sign's text. Can be plaintext, or array of JSON or prismarine-chat instances.
