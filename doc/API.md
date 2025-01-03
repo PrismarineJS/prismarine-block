@@ -31,6 +31,13 @@ Tells you if `heldItemType` is one of the right tool to harvest the block.
 
 Parse the block state and return its properties.
 
+#### getHash(prefixedName, states)
+
+**(Bedrock Edition)** Returns an integer hash to represent the block state.
+
+* `prefixedName` - The name of the block, including the `minecraft:` prefix (string).
+* `states` - A record of block state properties.
+
 #### block.digTime(heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {})
 
 Tells you how long it will take to dig the block, in milliseconds.
@@ -74,6 +81,10 @@ Simplified block entity data using prismarine-nbt's simplify() function. Only fo
 
 Number which represents different things depending on the block.
 See http://www.minecraftwiki.net/wiki/Data_values#Data
+
+#### block.hash
+
+**(Bedrock Edition)** A hash uniquely representing the block name and its properties (number).
 
 #### block.light
 
