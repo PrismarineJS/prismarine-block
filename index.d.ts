@@ -43,7 +43,7 @@ export declare class Block {
     // Contains a full NBT, unserialized object
     entity: NBT | null;
 
-    // (Bedrock Edition) A hash to uniquely represent block name and properties
+    // (Bedrock Edition) A hash to uniquely represent block name and its properties
     hash?: number
 
     /**
@@ -184,8 +184,8 @@ export declare class Block {
     static fromString(stateString: string, biomeId: number): Block;
 
     /**
-     * (Bedrock Edition) Returns an integer hash to reperesent the block state
-     * @param name name of the block, with a minecraft: prefix
+     * (Bedrock Edition) Returns an integer hash to represent the block state
+     * @param prefixedName name of the block, with a minecraft: prefix
      * @param states a record of block state properties
      */
     static getHash(prefixedName: string, states: States): number | undefined
