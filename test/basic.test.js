@@ -130,6 +130,7 @@ describe('Dig time', () => {
           it('using iron_shovel', () => {
             const tool = registry.itemsByName[toolName]
             const block = Block.fromStateId(registry.blocksByName[blockName].defaultState)
+            console.log('Block', block)
             const time = block.digTime(tool.id, false, false, false, [], {})
             expect(time).toBe(750)
           })
@@ -171,8 +172,29 @@ describe('fromString', () => {
     '1.20': 'minecraft:candle[lit=true]'
   }
   for (const [version, str] of Object.entries(versions)) {
+    it(version, () => {
+      const Block = require('prismarine-block')(version)
+      const block = Block.fromString(str, 0)
+      // console.log(block)
+      expect(block.getProperties().lit).toBeTruthy()
+    })
+  }
+})
+
+describe('Block hash computation', () => {
+  for (const version of ['bedrock_1.20.0']) {
     const Block = require('prismarine-block')(version)
-    const block = Block.fromString(str, 0)
-    expect(block.getProperties().lit).toBeTruthy()
+    it('minecraft:soul_soil', function () {
+      const block = Block.fromString('minecraft:soul_soil', 0)
+      expect(block.hash).toBe(601701031)
+    })
+    it('minecraft:planks', function () {
+      const block = Block.fromString('minecraft:planks', 0)
+      expect(block.hash).toBe(1835335165)
+    })
+    it('minecraft:stone', function () {
+      const block = Block.fromString('minecraft:stone', 0)
+      expect(block.hash).toBe(-1177000405)
+    })
   }
 })
