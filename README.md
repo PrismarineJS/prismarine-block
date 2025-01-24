@@ -28,6 +28,9 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.21.0
+* [Add isWaterlogged to API (#105)](https://github.com/PrismarineJS/prismarine-block/commit/bf84ca682255db995dfaba23e03209cc5af3ead6) (thanks @extremeheat)
+
 ### 1.20.0
 * [Bump mocha from 10.8.2 to 11.0.1 (#104)](https://github.com/PrismarineJS/prismarine-block/commit/21e8ea2128df9bb90b59aa58fa491d6dd6031a3f) (thanks @dependabot[bot])
 * [Add support for Bedrock edition block hashes (#97)](https://github.com/PrismarineJS/prismarine-block/commit/bc8a7af40438d6d6c715fc8d1e1da8a087c588ad) (thanks @FreezeEngine)
