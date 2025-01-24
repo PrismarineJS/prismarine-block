@@ -163,6 +163,7 @@ function provider (registry, { Biome, version }) {
         this.diggable = false
       }
 
+      // Properties - this is set for all versions even those with metadata
       this._properties = {}
       if (version.type === 'pc') {
         if (usesBlockStates) {
@@ -183,17 +184,25 @@ function provider (registry, { Biome, version }) {
               if (this._properties) break
             }
           }
+          this._properties ??= {}
         }
       } else if (version.type === 'bedrock') {
         const states = registry.blockStates?.[this.stateId]?.states || {}
         for (const state in states) {
           this._properties[state] = states[state].value
         }
+      } else {
+        throw new Error('Unknown registry type: ' + version.type)
       }
+      this.isWaterlogged = this._properties.waterlogged
 
-      // This can be expanded to other non-sign related things
+      // Extras - Inject helper methods based on the specific block type.
       if (this.name.includes('sign')) {
         mergeObject(this, blockMethods.sign)
+      }
+
+      if (blockEnum && registry.supportFeature('blockHashes')) {
+        this.hash = Block.getHash(this.name, this._properties)
       }
     }
 
@@ -269,6 +278,21 @@ function provider (registry, { Biome, version }) {
 
     getProperties () {
       return Object.assign(this._properties, this.computedStates)
+    }
+
+    static getHash (name, states) {
+      if (registry.supportFeature('blockHashes')) {
+        const sortedStates = {}
+        for (const key of Object.keys(states).sort()) {
+          sortedStates[key] = states[key]
+        }
+        const tag = nbt.comp({
+          name: { type: 'string', value: name.includes(':') ? name : `minecraft:${name}` },
+          states: nbt.comp(sortedStates)
+        })
+        const buf = nbt.writeUncompressed(tag, 'little')
+        return computeFnv1a32Hash(buf)
+      }
     }
 
     canHarvest (heldItemType) {
@@ -392,4 +416,14 @@ function provider (registry, { Biome, version }) {
 
 function mergeObject (to, from) {
   Object.defineProperties(to, Object.getOwnPropertyDescriptors(from))
+}
+
+function computeFnv1a32Hash (buf) {
+  const FNV1_OFFSET_32 = 0x811c9dc5
+  let h = FNV1_OFFSET_32
+  for (let i = 0; i < buf.length; i++) {
+    h ^= buf[i] & 0xff
+    h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24)
+  }
+  return h & 0xffffffff
 }
