@@ -28,6 +28,12 @@ See [doc/API.md](doc/API.md)
 
 ## History
 
+### 1.22.0
+* [Update sign blockEntity for 1.21.5 (#115)](https://github.com/PrismarineJS/prismarine-block/commit/a660e4a45c3afdd932d9b9311a93567c49e9c80e) (thanks @extremeheat)
+* [Bump expect from 29.7.0 to 30.0.5 (#114)](https://github.com/PrismarineJS/prismarine-block/commit/8e1eec194befe4a3d8c26a4a15d866f3fe9031eb) (thanks @dependabot[bot])
+* [node 22 (#108)](https://github.com/PrismarineJS/prismarine-block/commit/f2177e04d14165531521aabafd7dcef43eaa5a2c) (thanks @rom1504)
+* [Issue/102 (#103)](https://github.com/PrismarineJS/prismarine-block/commit/cd294605cbba4cc24559f7ee2fb0f5b60ab4fdd0) (thanks @tabbry)
+
 ### 1.21.0
 * [Add isWaterlogged to API (#105)](https://github.com/PrismarineJS/prismarine-block/commit/bf84ca682255db995dfaba23e03209cc5af3ead6) (thanks @extremeheat)
 
