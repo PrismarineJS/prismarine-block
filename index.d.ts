@@ -81,7 +81,7 @@ export declare class Block {
      * - block - currently, partially solid blocks, such as half-slabs and ladders, are considered entirely solid.
      * - empty - such as flowers and lava.
      */
-    boundingBox: string;
+    boundingBox: 'block' | 'empty';
 
     /**
      * If the block texture has some transparency.
