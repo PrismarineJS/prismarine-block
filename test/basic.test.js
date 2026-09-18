@@ -2,6 +2,60 @@
 
 const expect = require('expect').default
 
+// Block tags decide which tools mine a block from 1.17 on (minecraft-data tags.json, exposed as registry.tags).
+// The fixture is the subset of vanilla 26.1 tags these cases need, in the tags.json shape.
+describe('Dig time from block tags', () => {
+  const registry = require('prismarine-registry')('26.1')
+  registry.tags = {
+    'minecraft:block': {
+      'minecraft:leaves': ['minecraft:oak_leaves'],
+      'minecraft:mineable/axe': ['minecraft:melon', 'minecraft:oak_log'],
+      'minecraft:mineable/hoe': ['minecraft:oak_leaves'],
+      'minecraft:mineable/pickaxe': ['minecraft:iron_ore', 'minecraft:obsidian', 'minecraft:stone'],
+      'minecraft:sword_efficient': ['minecraft:melon'],
+      'minecraft:sword_instantly_mines': ['minecraft:bamboo'],
+      'minecraft:wool': ['minecraft:white_wool']
+    }
+  }
+  const Block = require('prismarine-block')(registry)
+  const block = name => Block.fromStateId(registry.blocksByName[name].defaultState, 0)
+  const item = name => registry.itemsByName[name].id
+  const dig = (blockName, itemName, enchantments = []) => block(blockName).digTime(itemName ? item(itemName) : null, false, false, false, enchantments)
+
+  it('uses the pickaxe tier speed for a tier-gated ore', () => {
+    expect(dig('iron_ore', 'diamond_pickaxe')).toBe(600)
+    expect(dig('obsidian', 'diamond_pickaxe')).toBe(9400)
+  })
+  it('applies efficiency on top of the tag speed', () => {
+    expect(dig('iron_ore', 'diamond_pickaxe', [{ name: 'efficiency', lvl: 5 }])).toBe(150)
+  })
+  it('keeps the harvest penalty for a tool below the required tier', () => {
+    expect(dig('iron_ore', 'wooden_pickaxe')).toBe(7500)
+    expect(dig('stone', null)).toBe(7500)
+  })
+  it('uses the vanilla sword rules', () => {
+    expect(dig('melon', 'diamond_sword')).toBe(1000)
+    expect(dig('melon', 'diamond_axe')).toBe(200)
+    expect(dig('bamboo', 'diamond_sword')).toBe(0)
+  })
+  it('uses the vanilla shears rules', () => {
+    expect(dig('oak_leaves', 'shears')).toBe(0)
+    expect(dig('white_wool', 'shears')).toBe(250)
+  })
+  it('ignores tools that do not apply to the block', () => {
+    expect(dig('oak_log', 'diamond_pickaxe')).toBe(dig('oak_log', null))
+  })
+})
+
+describe('Dig time without block tags (before 1.17)', () => {
+  const registry = require('prismarine-registry')('1.16.4')
+  const Block = require('prismarine-block')(registry)
+  it('mines stone with an iron pickaxe from materials', () => {
+    const stone = Block.fromStateId(registry.blocksByName.stone.defaultState, 0)
+    expect(stone.digTime(registry.itemsByName.iron_pickaxe.id, false, false, false)).toBe(400)
+  })
+})
+
 // https://minecraft.gamepedia.com/Breaking#Blocks_by_hardness
 describe('Dig time', () => {
   describe('1.20.5', () => {

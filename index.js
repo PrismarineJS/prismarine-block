@@ -95,6 +95,41 @@ function provider (registry, { Biome, version }) {
     return 0
   }
 
+  // Block tags (registry.tags, minecraft-data 1.13+) describe which tools mine a block since 1.17. When present they
+  // replace the single-material speed lookup: a block can be in several mineable/* tags, and the sword and shears
+  // rules below are the vanilla ToolMaterial/ShearsItem constants, which are not in any data file.
+  const blockTags = registry.tags?.['minecraft:block']
+  const tagSets = {}
+  function inTag (tag, blockName) {
+    if (!tagSets[tag]) tagSets[tag] = new Set(blockTags?.[`minecraft:${tag}`] ?? [])
+    return tagSets[tag].has(`minecraft:${blockName}`)
+  }
+  const hasToolTags = Boolean(blockTags?.['minecraft:mineable/pickaxe'])
+  const TOOL_TYPES = ['pickaxe', 'axe', 'shovel', 'hoe']
+
+  function tagBreakingSpeed (block, heldItemType) {
+    const item = registry.items[heldItemType]
+    if (!item) return 1
+    const name = block.name
+    if (item.name === 'shears') {
+      if (name === 'cobweb' || inTag('leaves', name)) return 15
+      if (inTag('wool', name)) return 5
+      if (name === 'vine' || name === 'glow_lichen') return 2
+      return 1
+    }
+    if (item.name.endsWith('_sword')) {
+      if (name === 'cobweb') return 15
+      if (inTag('sword_instantly_mines', name)) return Infinity
+      if (inTag('sword_efficient', name)) return 1.5
+      return 1
+    }
+    for (const type of TOOL_TYPES) {
+      const speed = registry.materials[`mineable/${type}`]?.[heldItemType]
+      if (speed && inTag(`mineable/${type}`, name)) return speed
+    }
+    return 1
+  }
+
   function getMiningFatigueMultiplier (effectLevel) {
     switch (effectLevel) {
       case 0: return 1.0
@@ -306,14 +341,17 @@ function provider (registry, { Biome, version }) {
     digTime (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
       if (creative) return 0
 
-      const materialToolMultipliers = registry.materials[this.material]
-      const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
-
       // Compute breaking speed multiplier
       let blockBreakingSpeed = 1
 
-      if (isBestTool) {
-        blockBreakingSpeed = materialToolMultipliers[heldItemType]
+      if (heldItemType && hasToolTags) {
+        blockBreakingSpeed = tagBreakingSpeed(this, heldItemType)
+        if (blockBreakingSpeed === Infinity) return 0
+      } else {
+        const materialToolMultipliers = registry.materials[this.material]
+        if (heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]) {
+          blockBreakingSpeed = materialToolMultipliers[heldItemType]
+        }
       }
 
       // Efficiency is applied if tools speed multiplier is more than 1.0
