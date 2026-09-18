@@ -119,9 +119,14 @@ function provider (registry, { Biome, version }) {
     }
     if (item.name.endsWith('_sword')) {
       if (name === 'cobweb') return 15
-      if (inTag('sword_instantly_mines', name)) return Infinity
-      if (inTag('sword_efficient', name)) return 1.5
-      return 1
+      // bamboo breaks instantly with a sword: BambooStalkBlock/BambooSaplingBlock.getDestroyProgress up to 1.21.4, the
+      // sword_instantly_mines tag from 1.21.5
+      const instantly = blockTags['minecraft:sword_instantly_mines'] ? inTag('sword_instantly_mines', name) : (name === 'bamboo' || name === 'bamboo_sapling')
+      if (instantly) return Infinity
+      // 1.20+: SwordItem.getDestroySpeed is 1.5 for the sword_efficient tag. 1.17 to 1.19: it is 1.5 for the PLANT,
+      // REPLACEABLE_PLANT and VEGETABLE materials and the leaves tag, which the material table of those versions encodes
+      if (blockTags['minecraft:sword_efficient']) return inTag('sword_efficient', name) ? 1.5 : 1
+      return registry.materials[block.material]?.[heldItemType] ?? 1
     }
     for (const type of TOOL_TYPES) {
       const speed = registry.materials[`mineable/${type}`]?.[heldItemType]

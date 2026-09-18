@@ -47,6 +47,35 @@ describe('Dig time from block tags', () => {
   })
 })
 
+describe('Dig time from block tags before the sword tags (1.17 to 1.19)', () => {
+  const registry = require('prismarine-registry')('1.19.4')
+  registry.tags = {
+    'minecraft:block': {
+      'minecraft:leaves': ['minecraft:oak_leaves'],
+      'minecraft:mineable/axe': ['minecraft:bamboo', 'minecraft:melon'],
+      'minecraft:mineable/hoe': ['minecraft:oak_leaves'],
+      'minecraft:mineable/pickaxe': ['minecraft:stone']
+    }
+  }
+  const Block = require('prismarine-block')(registry)
+  const block = name => Block.fromStateId(registry.blocksByName[name].defaultState, 0)
+  const dig = (blockName, itemName) => block(blockName).digTime(registry.itemsByName[itemName].id, false, false, false)
+
+  it('keeps the sword speeds of the material table', () => {
+    expect(dig('oak_leaves', 'diamond_sword')).toBe(200) // SwordItem: 1.5 for leaves
+    expect(dig('melon', 'diamond_sword')).toBe(1000) // and for the VEGETABLE material
+    expect(dig('stone', 'diamond_sword')).toBe(7500)
+  })
+  it('mines bamboo instantly with a sword', () => {
+    expect(dig('bamboo', 'diamond_sword')).toBe(0)
+    expect(dig('bamboo', 'diamond_axe')).toBe(200)
+  })
+  it('still takes the tool tiers from the mineable tags', () => {
+    expect(dig('oak_leaves', 'diamond_hoe')).toBe(0)
+    expect(dig('stone', 'diamond_pickaxe')).toBe(300)
+  })
+})
+
 describe('Dig time without block tags (before 1.17)', () => {
   const registry = require('prismarine-registry')('1.16.4')
   const Block = require('prismarine-block')(registry)
