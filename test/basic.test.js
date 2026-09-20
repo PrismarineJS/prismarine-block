@@ -61,10 +61,13 @@ describe('Dig time from block tags before the sword tags (1.17 to 1.19)', () => 
   const block = name => Block.fromStateId(registry.blocksByName[name].defaultState, 0)
   const dig = (blockName, itemName) => block(blockName).digTime(registry.itemsByName[itemName].id, false, false, false)
 
-  it('keeps the sword speeds of the material table', () => {
-    expect(dig('oak_leaves', 'diamond_sword')).toBe(200) // SwordItem: 1.5 for leaves
-    expect(dig('melon', 'diamond_sword')).toBe(1000) // and for the VEGETABLE material
-    expect(dig('stone', 'diamond_sword')).toBe(7500)
+  it('applies the pre-1.20 sword rule from the leaves tag and plant materials', () => {
+    // SwordItem.getDestroySpeed is 1.5 for the leaves tag and the PLANT/VEGETABLE/VINE materials. This comes from the
+    // tag and material names, not the material table's composite sword speeds, which drop to 1 when tags are regenerated.
+    expect(dig('oak_leaves', 'diamond_sword')).toBe(200) // leaves tag -> 1.5
+    expect(dig('melon', 'diamond_sword')).toBe(1000) // gourd (VEGETABLE) material -> 1.5
+    expect(dig('vine', 'diamond_sword')).toBe(200) // vine material -> 1.5
+    expect(dig('stone', 'diamond_sword')).toBe(7500) // no sword rule -> 1
   })
   it('mines bamboo instantly with a sword', () => {
     expect(dig('bamboo', 'diamond_sword')).toBe(0)

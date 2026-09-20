@@ -123,10 +123,16 @@ function provider (registry, { Biome, version }) {
       // sword_instantly_mines tag from 1.21.5
       const instantly = blockTags['minecraft:sword_instantly_mines'] ? inTag('sword_instantly_mines', name) : (name === 'bamboo' || name === 'bamboo_sapling')
       if (instantly) return Infinity
-      // 1.20+: SwordItem.getDestroySpeed is 1.5 for the sword_efficient tag. 1.17 to 1.19: it is 1.5 for the PLANT,
-      // REPLACEABLE_PLANT and VEGETABLE materials and the leaves tag, which the material table of those versions encodes
+      // 1.20+: SwordItem.getDestroySpeed is 1.5 for the sword_efficient tag.
       if (blockTags['minecraft:sword_efficient']) return inTag('sword_efficient', name) ? 1.5 : 1
-      return registry.materials[block.material]?.[heldItemType] ?? 1
+      // 1.17 to 1.19 have no sword_efficient tag: getDestroySpeed returns 1.5 for the leaves tag and the PLANT,
+      // REPLACEABLE_PLANT, VEGETABLE (gourd) and VINE materials, 1 otherwise. These are ToolMaterial constants, so
+      // encode them here rather than trusting the material table, whose composite sword speeds do not survive
+      // regeneration (e.g. leaves' sword speed drops from 1.5 to 1 when the tags are rebuilt).
+      if (inTag('leaves', name)) return 1.5
+      const materials = (block.material ?? '').split(';')
+      if (materials.some(m => m === 'plant' || m === 'gourd' || m === 'vine_or_glow_lichen')) return 1.5
+      return 1
     }
     for (const type of TOOL_TYPES) {
       const speed = registry.materials[`mineable/${type}`]?.[heldItemType]
