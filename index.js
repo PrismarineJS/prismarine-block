@@ -124,7 +124,15 @@ function provider (registry, { Biome, version }) {
 
       const blockEnum = registry.blocksByStateId[this.stateId]
       if (blockEnum) {
-        this.metadata = this.stateId - blockEnum.minStateId
+        // With a hashed-runtime registry (Bedrock 1.19.80+) minStateId is undefined and stateId is a state hash, not a
+        // contiguous index, so stateId - minStateId is NaN and every per-state lookup (shapes, properties) falls back to
+        // state 0. Resolve the state's index within the block's own states list instead.
+        if (blockEnum.minStateId === undefined && Array.isArray(blockEnum.states)) {
+          const index = blockEnum.states.indexOf(this.stateId)
+          this.metadata = index >= 0 ? index : 0
+        } else {
+          this.metadata = this.stateId - blockEnum.minStateId
+        }
         this.type = blockEnum.id
         this.name = blockEnum.name
         this.hardness = blockEnum.hardness

@@ -238,3 +238,25 @@ describe('Block hash computation', () => {
     })
   }
 })
+
+describe('hashed-runtime metadata (Bedrock 1.19.80+)', () => {
+  // A hashed-runtime registry keys states by 32-bit hashes and leaves minStateId undefined, so stateId - minStateId is
+  // NaN. The metadata must instead be the state's index within the block's own states list.
+  const registry = require('prismarine-registry')('bedrock_1.17.10')
+  const Block = require('prismarine-block')(registry)
+  const hashes = [111111, 222222, 333333]
+  const stateShapes = [[[0, 0, 0, 1, 0.5, 1]], [[0, 0.5, 0, 1, 1, 1]], [[0, 0, 0, 0.5, 1, 1]]]
+  const enumBlock = { id: 9999, name: 'hashed_stairs', hardness: 1, minStateId: undefined, maxStateId: undefined, states: hashes, defaultState: hashes[0], shapes: stateShapes[0], stateShapes, boundingBox: 'block' }
+  for (const h of hashes) registry.blocksByStateId[h] = enumBlock
+
+  it('resolves metadata by state index and picks the matching per-state shape', () => {
+    for (let i = 0; i < hashes.length; i++) {
+      const block = Block.fromStateId(hashes[i], 0)
+      expect(block.name).toBe('hashed_stairs')
+      expect(Number.isNaN(block.metadata)).toBe(false)
+      expect(block.metadata).toBe(i)
+      expect(block.missingStateShape).toBeUndefined()
+      expect(block.shapes).toEqual(stateShapes[i])
+    }
+  })
+})
