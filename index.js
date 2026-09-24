@@ -195,7 +195,10 @@ function provider (registry, { Biome, version }) {
           this._properties ??= {}
         }
       } else if (version.type === 'bedrock') {
-        const states = registry.blockStates?.[this.stateId]?.states || {}
+        // blockStates is a sequential array, so blockStates[stateId] only resolves while stateId is the array index. With a
+        // hashed-runtime registry (Bedrock 1.19.80+) stateId is a state hash, so the array lookup misses and properties come
+        // back empty. Prefer the stateId-keyed map (blockStatesByStateId) the registry provides for hashed versions.
+        const states = (registry.blockStatesByStateId?.[this.stateId] || registry.blockStates?.[this.stateId])?.states || {}
         for (const state in states) {
           this._properties[state] = states[state].value
         }

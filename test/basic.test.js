@@ -259,4 +259,15 @@ describe('hashed-runtime metadata (Bedrock 1.19.80+)', () => {
       expect(block.shapes).toEqual(stateShapes[i])
     }
   })
+
+  it('resolves getProperties() for hashed stateIds via blockStatesByStateId', () => {
+    // The registry provides a stateId-keyed map for hashed versions (indexing the blockStates array by a hash misses).
+    const props = [{ weirdo_direction: { value: 0 } }, { weirdo_direction: { value: 1 } }, { weirdo_direction: { value: 2 } }]
+    registry.blockStatesByStateId = {}
+    for (let i = 0; i < hashes.length; i++) registry.blockStatesByStateId[hashes[i]] = { name: 'hashed_stairs', states: props[i] }
+    for (let i = 0; i < hashes.length; i++) {
+      const block = Block.fromStateId(hashes[i], 0)
+      expect(block.getProperties()).toEqual({ weirdo_direction: i })
+    }
+  })
 })
