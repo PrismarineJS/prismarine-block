@@ -257,8 +257,13 @@ function provider (registry, { Biome, version }) {
           throw new Error('No matching block state found for ' + block.name + ' with properties ' + JSON.stringify(properties)) // This should not happen
         }
       } else if (version.type === 'bedrock') {
-        for (let stateId = block.minStateId; stateId <= block.maxStateId; stateId++) {
-          const state = registry.blockStates[stateId].states
+        // With a hashed-runtime registry (Bedrock 1.19.80+) minStateId/maxStateId are undefined, so walk the block's own
+        // states list instead and look each state up by its stateId.
+        const stateIds = block.minStateId === undefined && Array.isArray(block.states)
+          ? block.states
+          : Array.from({ length: block.maxStateId - block.minStateId + 1 }, (_, i) => block.minStateId + i)
+        for (const stateId of stateIds) {
+          const state = (registry.blockStatesByStateId?.[stateId] || registry.blockStates[stateId]).states
           if (Object.entries(properties).find(([prop, val]) => state[prop]?.value !== val)) continue
           return new Block(undefined, biomeId, 0, stateId)
         }
