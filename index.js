@@ -29,6 +29,7 @@ function loader (registryOrVersion) {
 
 function provider (registry, { Biome, version }) {
   const blockMethods = require('./blockEntity')(registry)
+  const interactionShapes = require('./interactionShapes')(registry)
   const usesBlockStates = (version.type === 'pc' && registry.supportFeature('blockStateId')) || (version.type === 'bedrock')
   const shapes = registry.blockCollisionShapes
   if (shapes) {
@@ -274,6 +275,10 @@ function provider (registry, { Biome, version }) {
 
     get blockEntity () {
       return this.entity ? nbt.simplify(this.entity) : undefined
+    }
+
+    get interactionShapes () {
+      return interactionShapes(this)
     }
 
     getProperties () {

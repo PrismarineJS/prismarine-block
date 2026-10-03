@@ -75,6 +75,13 @@ Vec3 instance.
 
 Array of bounding boxes representing the block shape. Each bounding box is an array of the form `[xmin, ymin, zmin, xmax, ymax, zmax]`. Depends on the type and state of the block.
 
+#### block.interactionShapes
+
+Selection boxes for cursor targeting, in the same local-coordinate format as `block.shapes`.
+This does not modify physical collision geometry. Java selection data must be available in the registry's `blockSelectionShapes` dataset; otherwise this returns `block.shapes`, including for Bedrock.
+
+Position-dependent model offsets use `block.position` (or the origin when no position is set). Legacy neighbor-dependent shapes require the corresponding computed properties; ambiguous states fall back to collision geometry. These are default-context shapes, not every held-item-dependent selection context.
+
 #### block.entity
 
 If this block is a block entity, this contains the NBT data for the entity.

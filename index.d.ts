@@ -74,6 +74,12 @@ export declare class Block {
      */
     shapes: Shape[]
 
+    /**
+     * Selection geometry, separate from physical collision shapes. Uses position
+     * for model offsets; falls back to shapes when selection data is unavailable.
+     */
+    readonly interactionShapes: Shape[]
+
     hardness: number;
 
     /**
