@@ -281,4 +281,14 @@ describe('hashed-runtime metadata (Bedrock 1.19.80+)', () => {
       expect(block.stateId).toBe(hashes[i])
     }
   })
+
+  it('resolves the stateId from metadata for hashed blocks', () => {
+    registry.blocks = { ...registry.blocks, [enumBlock.id]: enumBlock }
+    for (let i = 0; i < hashes.length; i++) {
+      const block = new Block(enumBlock.id, 0, i)
+      expect(block.stateId).toBe(hashes[i])
+      expect(block.name).toBe('hashed_stairs')
+    }
+    expect(new Block(enumBlock.id, 0, hashes.length).stateId).toBe(hashes[hashes.length - 1])
+  })
 })
