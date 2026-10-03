@@ -119,7 +119,13 @@ function provider (registry, { Biome, version }) {
       if (stateId === undefined && type !== undefined) {
         const b = registry.blocks[type]
         // Make sure the block is actually valid and metadata is within valid bounds
-        this.stateId = b === undefined ? null : Math.min(b.minStateId + metadata, b.maxStateId)
+        if (b !== undefined && b.minStateId === undefined && Array.isArray(b.states)) {
+          // With a hashed-runtime registry (Bedrock 1.19.80+) minStateId/maxStateId are undefined, so pick the state
+          // from the block's own states list.
+          this.stateId = b.states[Math.min(this.metadata, b.states.length - 1)]
+        } else {
+          this.stateId = b === undefined ? null : Math.min(b.minStateId + metadata, b.maxStateId)
+        }
       }
 
       const blockEnum = registry.blocksByStateId[this.stateId]
