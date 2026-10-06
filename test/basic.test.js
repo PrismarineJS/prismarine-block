@@ -24,6 +24,18 @@ describe('Dig time', () => {
     })
   })
 
+  describe('1.21.11', () => {
+    const registry = require('prismarine-registry')('1.21.11')
+    const Block = require('prismarine-block')(registry)
+
+    it('mines gold ore with iron pickaxe speed', () => {
+      const goldOre = Block.fromStateId(registry.blocksByName.gold_ore.defaultState, 0)
+      const pickaxe = registry.itemsByName.iron_pickaxe
+      const time = goldOre.digTime(pickaxe.id, false, false, false)
+      expect(time).toBe(750)
+    })
+  })
+
   describe('1.20.4', () => {
     const registry = require('prismarine-registry')('1.20.4')
     const Block = require('prismarine-block')(registry)

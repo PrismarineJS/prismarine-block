@@ -106,6 +106,27 @@ function provider (registry, { Biome, version }) {
     }
   }
 
+  function getMaterialToolMultipliers (block, heldItemType) {
+    const materialToolMultipliers = registry.materials[block.material]
+    if (!heldItemType || materialToolMultipliers?.[heldItemType]) {
+      return materialToolMultipliers
+    }
+
+    if (!block.canHarvest(heldItemType)) {
+      return materialToolMultipliers
+    }
+
+    const item = registry.items[heldItemType]
+    const itemNameParts = item?.name.split('_')
+    const toolType = itemNameParts?.[itemNameParts.length - 1]
+    const mineableToolMultipliers = registry.materials[`mineable/${toolType}`]
+    if (mineableToolMultipliers?.[heldItemType]) {
+      return mineableToolMultipliers
+    }
+
+    return materialToolMultipliers
+  }
+
   return class Block {
     constructor (type, biomeId, metadata, stateId) {
       this.type = type
@@ -311,7 +332,7 @@ function provider (registry, { Biome, version }) {
     digTime (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
       if (creative) return 0
 
-      const materialToolMultipliers = registry.materials[this.material]
+      const materialToolMultipliers = getMaterialToolMultipliers(this, heldItemType)
       const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
 
       // Compute breaking speed multiplier
