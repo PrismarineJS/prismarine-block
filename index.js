@@ -55,6 +55,9 @@ function provider (registry, { Biome, version }) {
               block.variations[i].shapes = shapes.shapes[shapesId]
             }
           }
+        } else if (shapesId instanceof Array) {
+          // Blocks without variations (piston_head, ...) still have one shape per metadata
+          block.stateShapes = shapesId.map(i => shapes.shapes[i])
         }
       }
 
