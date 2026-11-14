@@ -31,6 +31,11 @@ function provider (registry, { Biome, version }) {
   const blockMethods = require('./blockEntity')(registry)
   const interactionShapes = require('./interactionShapes')(registry)
   const usesBlockStates = (version.type === 'pc' && registry.supportFeature('blockStateId')) || (version.type === 'bedrock')
+  // Decoded state-property objects keyed by block state id. For 1.13+ the properties are a pure function of
+  // the state id, and decoding them (the loop below) is a large part of per-block construction cost, so the
+  // first block of each state id populates this and the rest reuse it. getProperties() returns a fresh merge,
+  // so this shared object is never handed out for mutation (the pre-1.13 path already shares its entry).
+  const propertiesByStateId = new Map()
   const shapes = registry.blockCollisionShapes
   if (shapes) {
     // Prepare block shapes
@@ -168,14 +173,20 @@ function provider (registry, { Biome, version }) {
       this._properties = {}
       if (version.type === 'pc') {
         if (usesBlockStates) {
-          const blockEnum = registry.blocksByStateId[this.stateId]
-          if (blockEnum && blockEnum.states) {
-            let data = this.metadata
-            for (let i = blockEnum.states.length - 1; i >= 0; i--) {
-              const prop = blockEnum.states[i]
-              this._properties[prop.name] = propValue(prop, data % prop.num_values)
-              data = Math.floor(data / prop.num_values)
+          const cached = propertiesByStateId.get(this.stateId)
+          if (cached !== undefined) {
+            this._properties = cached
+          } else {
+            const blockEnum = registry.blocksByStateId[this.stateId]
+            if (blockEnum && blockEnum.states) {
+              let data = this.metadata
+              for (let i = blockEnum.states.length - 1; i >= 0; i--) {
+                const prop = blockEnum.states[i]
+                this._properties[prop.name] = propValue(prop, data % prop.num_values)
+                data = Math.floor(data / prop.num_values)
+              }
             }
+            propertiesByStateId.set(this.stateId, this._properties)
           }
         } else {
           this._properties = legacyPcBlocksByIdmeta[this.type + ':' + this.metadata] || legacyPcBlocksByIdmeta[this.type + ':0']
@@ -282,7 +293,9 @@ function provider (registry, { Biome, version }) {
     }
 
     getProperties () {
-      return Object.assign(this._properties, this.computedStates)
+      // Return a fresh object: _properties may be shared between blocks of the same state id (see the
+      // propertiesByStateId cache), so it must never be handed out for a caller to mutate.
+      return { ...this._properties, ...this.computedStates }
     }
 
     static getHash (name, states) {
