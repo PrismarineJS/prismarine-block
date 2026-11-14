@@ -15,21 +15,51 @@ describe('interaction shapes', () => {
     }
   })
 
-  it('reads state-dependent selection geometry without changing collision shapes', () => {
-    const registry = createRegistry('1.20.1')
-    const heights = [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1]
-    registry.blockSelectionShapes = {
-      blocks: { wheat: heights.map((_, index) => index) },
-      shapes: Object.fromEntries(heights.map((height, index) => [index, [[0, 0, 0, 1, height, 1]]]))
-    }
-    const Block = loader(registry)
-    for (let age = 0; age < heights.length; age++) {
-      const block = Block.fromProperties('wheat', { age }, 0)
-      assert.deepStrictEqual(block.shapes, [])
-      assert.deepStrictEqual(block.interactionShapes, [[0, 0, 0, 1, heights[age], 1]])
-      assert.deepStrictEqual(block.shapes, [])
-    }
-  })
+  for (const [version, growthProperty] of [['1.20.1', 'age'], ['bedrock_1.17.10', 'growth'], ['bedrock_1.18.0', 'growth']]) {
+    describe(version, () => {
+      it('resolves selection shape IDs for every growth state without changing collision shapes', () => {
+        const registry = createRegistry(version)
+        const heights = [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1]
+        const shapeIds = [7, 0, 6, 1, 5, 2, 4, 3]
+        registry.blockSelectionShapes = {
+          blocks: { wheat: shapeIds },
+          shapes: Object.fromEntries(heights.map((height, index) => [shapeIds[index], [[0, 0, 0, 1, height, 1]]]))
+        }
+        const snapshot = JSON.stringify(registry.blockSelectionShapes)
+        const Block = loader(registry)
+        for (let growth = 0; growth < heights.length; growth++) {
+          const block = Block.fromProperties('wheat', { [growthProperty]: growth }, 0)
+          assert.deepStrictEqual(block.shapes, [])
+          assert.deepStrictEqual(block.interactionShapes, [[0, 0, 0, 1, heights[growth], 1]], `growth ${growth}`)
+          assert.deepStrictEqual(block.shapes, [])
+        }
+        assert.strictEqual(JSON.stringify(registry.blockSelectionShapes), snapshot)
+      })
+
+      it('preserves explicitly empty selection shapes for a solid block', () => {
+        const registry = createRegistry(version)
+        registry.blockSelectionShapes = { blocks: { stone: 0 }, shapes: { 0: [] } }
+        const Block = loader(registry)
+        const block = Block.fromStateId(registry.blocksByName.stone.defaultState, 0)
+        assert.deepStrictEqual(block.interactionShapes, [])
+        assert.deepStrictEqual(block.shapes, [[0, 0, 0, 1, 1, 1]])
+      })
+
+      for (const [missing, data] of [
+        ['block entry', { blocks: {}, shapes: {} }],
+        ['state entry', { blocks: { stone: [] }, shapes: {} }],
+        ['shape geometry', { blocks: { stone: 0 }, shapes: {} }]
+      ]) {
+        it(`falls back to collision shapes when selection data is missing ${missing}`, () => {
+          const registry = createRegistry(version)
+          registry.blockSelectionShapes = data
+          const Block = loader(registry)
+          const block = Block.fromStateId(registry.blocksByName.stone.defaultState, 0)
+          assert.strictEqual(block.interactionShapes, block.shapes)
+        })
+      }
+    })
+  }
 
   it('updates position-dependent outlines without modifying the data', () => {
     const registry = createRegistry('1.20.1')
@@ -78,12 +108,14 @@ describe('interaction shapes', () => {
     assert.strictEqual(block.interactionShapes, registry.blockSelectionShapes.shapes[1])
   })
 
-  it('preserves explicitly empty selection shapes', () => {
-    const registry = createRegistry('1.20.1')
-    registry.blockSelectionShapes = { blocks: { water: 0 }, shapes: { 0: [] } }
+  it('reads Bedrock selection geometry without changing collision shapes', () => {
+    const registry = createRegistry('bedrock_1.18.0')
+    registry.blockSelectionShapes = { blocks: { brewing_stand: 0 }, shapes: { 0: [[0.125, 0, 0.125, 0.875, 0.875, 0.875]] } }
     const Block = loader(registry)
-    const block = Block.fromProperties('water', { level: 0 }, 0)
-    assert.strictEqual(block.interactionShapes, registry.blockSelectionShapes.shapes[0])
+    const block = Block.fromStateId(registry.blocksByName.brewing_stand.defaultState, 0)
+    const collisionShapes = block.shapes.map(box => [...box])
+    assert.deepStrictEqual(block.interactionShapes, [[0.125, 0, 0.125, 0.875, 0.875, 0.875]])
+    assert.deepStrictEqual(block.shapes, collisionShapes)
   })
 
   it('does not leak computed properties into another legacy block', () => {

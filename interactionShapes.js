@@ -1,5 +1,5 @@
 module.exports = function (registry) {
-  const data = registry.version.type === 'pc' ? registry.blockSelectionShapes : null
+  const data = registry.blockSelectionShapes
   if (!data) return block => block.shapes
 
   const namesById = data.blockIds && Object.fromEntries(Object.entries(data.blockIds).map(([name, id]) => [id, name]))
