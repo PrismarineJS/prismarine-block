@@ -24,6 +24,52 @@ describe('Dig time', () => {
     })
   })
 
+  for (const version of ['1.21.1', '1.21.4', '1.21.11']) {
+    describe(version, () => {
+      const registry = require('prismarine-registry')(version)
+      const Block = require('prismarine-block')(registry)
+
+      for (const [blockName, toolName, time] of [
+        ['oak_log', null, 3000],
+        ['oak_log', 'diamond_pickaxe', 3000],
+        ['oak_log', 'diamond_axe', 400],
+        ['dirt', 'diamond_axe', 750],
+        ['dirt', 'diamond_shovel', 100],
+        ['copper_ore', 'iron_pickaxe', 750],
+        ['copper_ore', 'wooden_pickaxe', 7500],
+        ['copper_ore', 'golden_pickaxe', 1250],
+        ['copper_ore', 'diamond_axe', 15000],
+        ['smooth_basalt', 'iron_pickaxe', 350],
+        ['smooth_basalt', 'diamond_axe', 6250],
+        ['gold_ore', 'iron_pickaxe', 750],
+        ['gold_ore', 'stone_pickaxe', 3750],
+        ['gold_ore', null, 15000]
+      ]) {
+        it(`mines ${blockName} with ${toolName ?? 'hand'} in ${time} ms`, () => {
+          const block = Block.fromStateId(registry.blocksByName[blockName].defaultState, 0)
+          const tool = toolName ? registry.itemsByName[toolName].id : null
+          expect(block.digTime(tool, false, false, false)).toBe(time)
+        })
+      }
+
+      it('does not apply efficiency to an ineffective tool', () => {
+        const block = Block.fromStateId(registry.blocksByName.oak_log.defaultState, 0)
+        expect(block.digTime(registry.itemsByName.diamond_pickaxe.id, false, false, false, [{ name: 'efficiency', lvl: 5 }])).toBe(3000)
+      })
+    })
+  }
+
+  describe('missing tool applicability', () => {
+    const registry = require('prismarine-registry')('1.21.4')
+    const Block = require('prismarine-block')(registry)
+
+    it('does not infer a tool from its name when block material and harvest tools are missing', () => {
+      const block = Block.fromStateId(registry.blocksByName.oak_log.defaultState, 0)
+      block.material = undefined
+      expect(block.digTime(registry.itemsByName.diamond_pickaxe.id, false, false, false)).toBe(3000)
+    })
+  })
+
   describe('1.20.4', () => {
     const registry = require('prismarine-registry')('1.20.4')
     const Block = require('prismarine-block')(registry)

@@ -106,6 +106,28 @@ function provider (registry, { Biome, version }) {
     }
   }
 
+  const mineableToolMultipliers = Object.entries(registry.materials)
+    .filter(([material]) => material.startsWith('mineable/'))
+    .map(([, multipliers]) => multipliers)
+
+  function getMaterialToolMultipliers (block, heldItemType) {
+    const materialToolMultipliers = registry.materials[block.material]
+    if (!heldItemType || materialToolMultipliers?.[heldItemType] > 1 || !block.harvestTools) {
+      return materialToolMultipliers
+    }
+
+    // Tier-gated materials can omit effective tools or give them hand speed. Use the block's explicit harvest
+    // tools to identify its mineable family, not canHarvest (also true for hand-harvestable
+    // blocks). Lower tiers still get their mining speed; canHarvest applies the drop penalty.
+    for (const multipliers of mineableToolMultipliers) {
+      if (multipliers[heldItemType] && Object.keys(block.harvestTools).some(tool => block.harvestTools[tool] && multipliers[tool])) {
+        return multipliers
+      }
+    }
+
+    return materialToolMultipliers
+  }
+
   return class Block {
     constructor (type, biomeId, metadata, stateId) {
       this.type = type
@@ -311,7 +333,7 @@ function provider (registry, { Biome, version }) {
     digTime (heldItemType, creative, inWater, notOnGround, enchantments = [], effects = {}) {
       if (creative) return 0
 
-      const materialToolMultipliers = registry.materials[this.material]
+      const materialToolMultipliers = getMaterialToolMultipliers(this, heldItemType)
       const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
 
       // Compute breaking speed multiplier
