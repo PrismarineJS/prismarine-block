@@ -107,12 +107,25 @@ function provider (registry, { Biome, version }) {
   }
 
   return class Block {
+    // Built lazily: most block lookups (pathfinding, findBlocks, collision) never read the biome, and a
+    // Block is constructed per examined position, so eagerly allocating a Biome every time was a measurable
+    // cost. Stays transparent: `block.biome` still returns the Biome, and assigning it still works.
+    get biome () {
+      if (this._biome === undefined) this._biome = new Biome(this.biomeId)
+      return this._biome
+    }
+
+    set biome (biome) {
+      this._biome = biome
+    }
+
     constructor (type, biomeId, metadata, stateId) {
       this.type = type
       this.metadata = metadata ?? 0
       this.light = 0
       this.skyLight = 0
-      this.biome = new Biome(biomeId)
+      this.biomeId = biomeId
+      this._biome = undefined
       this.position = null
       this.stateId = stateId
       this.computedStates = {}
