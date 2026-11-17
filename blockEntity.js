@@ -150,7 +150,12 @@ function signBedrock (registry) {
   return {
     getSignText () {
       if (!this.entity) return ['']
-      return [this.entity.Text.value]
+      const { Text, FrontText, BackText } = this.entity.value
+      // Since 1.20 a sign has two sides, each a compound with its own Text
+      if (FrontText || BackText) {
+        return [FrontText?.value.Text?.value ?? '', BackText?.value.Text?.value ?? '']
+      }
+      return [Text?.value ?? '']
     },
     setSignText (text) {
       if (!this.entity) {
