@@ -79,8 +79,29 @@ describe('handles block entities', () => {
         if (registry.type === 'bedrock') {
           assert(sign.blockEntity.Text.toString() === 'Hello\nWorld')
           assert(sign.blockEntity.id === 'Sign')
+          assert.deepStrictEqual(sign.getSignText(), ['Hello\nWorld'])
+          assert(sign.signText === 'Hello\nWorld')
         }
       })
+
+      if (registry.type === 'bedrock') {
+        it('.getSignText reads a sign entity from the server on ' + version, () => {
+          const sign = Block.fromStateId(registry.blocksByName.standing_sign.defaultState)
+
+          // A sign from before 1.20 has one side
+          sign.entity = nbt.comp({ id: nbt.string('Sign'), Text: nbt.string('Hello\nWorld') })
+          assert.deepStrictEqual(sign.getSignText(), ['Hello\nWorld'])
+
+          // Since 1.20 a sign has a front and a back, each with its own Text
+          const side = text => nbt.comp({ Text: nbt.string(text), SignTextColor: nbt.int(-16777216), IgnoreLighting: nbt.byte(0) })
+          sign.entity = nbt.comp({ id: nbt.string('Sign'), FrontText: side('Front\nText'), BackText: side('Back'), IsWaxed: nbt.byte(0) })
+          assert.deepStrictEqual(sign.getSignText(), ['Front\nText', 'Back'])
+          assert(sign.signText === 'Front\nText')
+
+          sign.entity = nbt.comp({ id: nbt.string('Sign'), FrontText: side('Front') })
+          assert.deepStrictEqual(sign.getSignText(), ['Front', ''])
+        })
+      }
     })
   }
 })
