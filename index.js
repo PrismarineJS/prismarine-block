@@ -21,6 +21,11 @@ const legacyPcBlocksByIdmeta = Object.entries(mcData.legacy.pc.blocks).reduce((o
   return obj // array of { '255:0': { mode: 'save' }, }
 }, {})
 
+// Blocks whose collision box the game moves sideways by a random amount per
+// x and z (OffsetType.XZ), and the most it moves them. No other block with an
+// offset has a collision box (1.14 to 26.3).
+const xzOffsetBlocks = { bamboo: 0.25, pointed_dripstone: 0.125, sulfur_spike: 0.125 }
+
 function loader (registryOrVersion) {
   const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
   const version = registry.version
@@ -32,6 +37,13 @@ function provider (registry, { Biome, version }) {
   const interactionShapes = require('./interactionShapes')(registry)
   const usesBlockStates = (version.type === 'pc' && registry.supportFeature('blockStateId')) || (version.type === 'bedrock')
   const shapes = registry.blockCollisionShapes
+  const xzOffsetByType = {}
+  if (version.type === 'pc') {
+    for (const name in xzOffsetBlocks) {
+      const block = registry.blocksByName[name]
+      if (block) xzOffsetByType[block.id] = xzOffsetBlocks[name]
+    }
+  }
   if (shapes) {
     // Prepare block shapes
     for (const id in registry.blocks) {
@@ -147,6 +159,9 @@ function provider (registry, { Biome, version }) {
               this.shapes = variations[i].shapes
             }
           }
+        }
+        if (xzOffsetByType[blockEnum.id] !== undefined && this.shapes) {
+          offsetShapesByPosition(this, xzOffsetByType[blockEnum.id])
         }
         this.boundingBox = blockEnum.boundingBox
         this.transparent = blockEnum.transparent
@@ -417,6 +432,43 @@ function provider (registry, { Biome, version }) {
     if (state.type === 'bool') return !value
     return value
   }
+}
+
+// How far the game moves an offset block at x z, as Mth.getSeed(x, 0, z) and
+// BlockBehaviour's offset function compute it.
+function xzOffset (x, z, max) {
+  let seed = BigInt(Math.imul(x, 3129871)) ^ (BigInt(z) * 116129781n)
+  seed = BigInt.asIntN(64, seed * seed * 42317861n + seed * 11n) >> 16n
+  const axis = shift => Math.max(-max, Math.min(max, (Math.fround(Number((seed >> shift) & 15n) / 15) - 0.5) * 0.5))
+  return [axis(0n), axis(8n)]
+}
+
+// minecraft-data has the collision boxes of these blocks as they are at 0 0,
+// where the offset is -max on both axes. The world sets block.position after
+// the block is made, so the boxes are moved when they are read. Assigning
+// block.shapes replaces this as before.
+function offsetShapesByPosition (block, max) {
+  const atOrigin = block.shapes
+  let lastX, lastZ, last
+  Object.defineProperty(block, 'shapes', {
+    configurable: true,
+    enumerable: true,
+    get () {
+      if (!this.position) return atOrigin
+      const x = Math.floor(this.position.x)
+      const z = Math.floor(this.position.z)
+      if (last === undefined || x !== lastX || z !== lastZ) {
+        const [dx, dz] = xzOffset(x, z, max)
+        last = atOrigin.map(([x1, y1, z1, x2, y2, z2]) => [x1 + max + dx, y1, z1 + max + dz, x2 + max + dx, y2, z2 + max + dz])
+        lastX = x
+        lastZ = z
+      }
+      return last
+    },
+    set (value) {
+      Object.defineProperty(this, 'shapes', { value, writable: true, enumerable: true, configurable: true })
+    }
+  })
 }
 
 function mergeObject (to, from) {

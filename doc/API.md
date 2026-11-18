@@ -75,6 +75,8 @@ Vec3 instance.
 
 Array of bounding boxes representing the block shape. Each bounding box is an array of the form `[xmin, ymin, zmin, xmax, ymax, zmax]`. Depends on the type and state of the block.
 
+On Java Edition, bamboo and pointed dripstone stand off the middle of their block by an amount that depends on the x and z of their position, and their boxes follow `block.position`. Without a position they are the boxes of a block at 0 0.
+
 #### block.interactionShapes
 
 Selection boxes for cursor targeting, in the same local-coordinate format as `block.shapes`.
