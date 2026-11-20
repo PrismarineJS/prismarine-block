@@ -96,6 +96,39 @@ function provider (registry, { Biome, version }) {
     return 0
   }
 
+  const f = Math.fround
+
+  // The client adds the progress of one tick (a float) to a float sum each tick and breaks the block on
+  // the tick the sum reaches 1. Counts those ticks without adding one at a time: between two powers of two
+  // the sum grows by the same rounded amount each tick, unless the progress lies exactly halfway between
+  // two floats there, where ticks are added one by one.
+  function ticksToBreak (delta) {
+    let sum = delta
+    let ticks = 1
+    while (sum < 1) {
+      let exponent = Math.floor(Math.log2(sum))
+      if (2 ** exponent > sum) exponent--
+      if (2 ** (exponent + 1) <= sum) exponent++
+      const ulp = 2 ** (exponent - 23)
+      const units = delta / ulp
+      if (units - Math.floor(units) !== 0.5) {
+        const step = Math.round(units) * ulp
+        if (step === 0) return Infinity
+        const end = Math.min(2 ** (exponent + 1), 1)
+        const steps = Math.ceil((end - sum) / step) - 1
+        if (steps > 0) {
+          sum += steps * step
+          ticks += steps
+        }
+      }
+      const next = f(sum + delta)
+      if (next === sum) return Infinity
+      sum = next
+      ticks++
+    }
+    return ticks
+  }
+
   function getMiningFatigueMultiplier (effectLevel) {
     switch (effectLevel) {
       case 0: return 1.0
@@ -314,17 +347,18 @@ function provider (registry, { Biome, version }) {
       const materialToolMultipliers = registry.materials[this.material]
       const isBestTool = heldItemType && materialToolMultipliers && materialToolMultipliers[heldItemType]
 
+      // The game does this math in 32-bit floats, so every step is rounded with Math.fround as it is there.
       // Compute breaking speed multiplier
       let blockBreakingSpeed = 1
 
       if (isBestTool) {
-        blockBreakingSpeed = materialToolMultipliers[heldItemType]
+        blockBreakingSpeed = f(materialToolMultipliers[heldItemType])
       }
 
       // Efficiency is applied if tools speed multiplier is more than 1.0
       const efficiencyLevel = getEnchantmentLevel('efficiency', enchantments)
       if (efficiencyLevel > 0 && blockBreakingSpeed > 1.0) {
-        blockBreakingSpeed += efficiencyLevel * efficiencyLevel + 1
+        blockBreakingSpeed = f(blockBreakingSpeed + (efficiencyLevel * efficiencyLevel + 1))
       }
 
       // Haste is always considered when effect is present, and when both
@@ -334,33 +368,33 @@ function provider (registry, { Biome, version }) {
         getEffectLevel('ConduitPower', effects))
 
       if (hasteLevel > 0) {
-        blockBreakingSpeed *= 1 + (0.2 * hasteLevel)
+        blockBreakingSpeed = f(blockBreakingSpeed * f(1 + f(hasteLevel * f(0.2))))
       }
 
       // Mining fatigue is applied afterwards, but multiplier only decreases up to level 4
       const miningFatigueLevel = getEffectLevel('MiningFatigue', effects)
 
       if (miningFatigueLevel > 0) {
-        blockBreakingSpeed *= getMiningFatigueMultiplier(miningFatigueLevel)
+        blockBreakingSpeed = f(blockBreakingSpeed * f(getMiningFatigueMultiplier(miningFatigueLevel)))
       }
 
       // Apply 5x breaking speed de-buff if we are submerged in water and do not have aqua affinity
       const aquaAffinityLevel = getEnchantmentLevel('aqua_affinity', enchantments)
 
       if (inWater && aquaAffinityLevel === 0) {
-        blockBreakingSpeed /= 5.0
+        blockBreakingSpeed = f(blockBreakingSpeed / 5.0)
       }
 
       // We always get 5x breaking speed de-buff if we are not on the ground
       if (notOnGround) {
-        blockBreakingSpeed /= 5.0
+        blockBreakingSpeed = f(blockBreakingSpeed / 5.0)
       }
 
       // Compute block breaking delta (breaking progress applied in a single tick)
-      const blockHardness = this.hardness
+      const blockHardness = f(this.hardness)
       const matchingToolMultiplier = this.canHarvest(heldItemType) ? 30.0 : 100.0
 
-      let blockBreakingDelta = blockBreakingSpeed / blockHardness / matchingToolMultiplier
+      let blockBreakingDelta = f(f(blockBreakingSpeed / blockHardness) / matchingToolMultiplier)
 
       // Delta will always be zero if block has -1.0 durability
       if (blockHardness === -1.0) {
@@ -378,10 +412,7 @@ function provider (registry, { Biome, version }) {
       }
 
       // Determine how many ticks breaking will take, then convert to millis and return result
-      // We round ticks up because if progress is below 1.0, it will be finished next tick
-
-      const ticksToBreakBlock = Math.ceil(1.0 / blockBreakingDelta)
-      return ticksToBreakBlock * 50
+      return ticksToBreak(blockBreakingDelta) * 50
     }
   }
 
