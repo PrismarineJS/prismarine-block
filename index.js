@@ -120,12 +120,26 @@ function provider (registry, { Biome, version }) {
       if (stateId === undefined && type !== undefined) {
         const b = registry.blocks[type]
         // Make sure the block is actually valid and metadata is within valid bounds
-        this.stateId = b === undefined ? null : Math.min(b.minStateId + metadata, b.maxStateId)
+        if (b !== undefined && b.minStateId === undefined && Array.isArray(b.states)) {
+          // With a hashed-runtime registry (Bedrock 1.19.80+) minStateId/maxStateId are undefined, so pick the state
+          // from the block's own states list.
+          this.stateId = b.states[Math.min(this.metadata, b.states.length - 1)]
+        } else {
+          this.stateId = b === undefined ? null : Math.min(b.minStateId + metadata, b.maxStateId)
+        }
       }
 
       const blockEnum = registry.blocksByStateId[this.stateId]
       if (blockEnum) {
-        this.metadata = this.stateId - blockEnum.minStateId
+        // With a hashed-runtime registry (Bedrock 1.19.80+) minStateId is undefined and stateId is a state hash, not a
+        // contiguous index, so stateId - minStateId is NaN and every per-state lookup (shapes, properties) falls back to
+        // state 0. Resolve the state's index within the block's own states list instead.
+        if (blockEnum.minStateId === undefined && Array.isArray(blockEnum.states)) {
+          const index = blockEnum.states.indexOf(this.stateId)
+          this.metadata = index >= 0 ? index : 0
+        } else {
+          this.metadata = this.stateId - blockEnum.minStateId
+        }
         this.type = blockEnum.id
         this.name = blockEnum.name
         this.hardness = blockEnum.hardness
@@ -188,7 +202,10 @@ function provider (registry, { Biome, version }) {
           this._properties ??= {}
         }
       } else if (version.type === 'bedrock') {
-        const states = registry.blockStates?.[this.stateId]?.states || {}
+        // blockStates is a sequential array, so blockStates[stateId] only resolves while stateId is the array index. With a
+        // hashed-runtime registry (Bedrock 1.19.80+) stateId is a state hash, so the array lookup misses and properties come
+        // back empty. Prefer the stateId-keyed map (blockStatesByStateId) the registry provides for hashed versions.
+        const states = (registry.blockStatesByStateId?.[this.stateId] || registry.blockStates?.[this.stateId])?.states || {}
         for (const state in states) {
           this._properties[state] = states[state].value
         }
@@ -247,8 +264,13 @@ function provider (registry, { Biome, version }) {
           throw new Error('No matching block state found for ' + block.name + ' with properties ' + JSON.stringify(properties)) // This should not happen
         }
       } else if (version.type === 'bedrock') {
-        for (let stateId = block.minStateId; stateId <= block.maxStateId; stateId++) {
-          const state = registry.blockStates[stateId].states
+        // With a hashed-runtime registry (Bedrock 1.19.80+) minStateId/maxStateId are undefined, so walk the block's own
+        // states list instead and look each state up by its stateId.
+        const stateIds = block.minStateId === undefined && Array.isArray(block.states)
+          ? block.states
+          : Array.from({ length: block.maxStateId - block.minStateId + 1 }, (_, i) => block.minStateId + i)
+        for (const stateId of stateIds) {
+          const state = (registry.blockStatesByStateId?.[stateId] || registry.blockStates[stateId]).states
           if (Object.entries(properties).find(([prop, val]) => state[prop]?.value !== val)) continue
           return new Block(undefined, biomeId, 0, stateId)
         }

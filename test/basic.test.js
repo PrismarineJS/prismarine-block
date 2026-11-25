@@ -238,3 +238,57 @@ describe('Block hash computation', () => {
     })
   }
 })
+
+describe('hashed-runtime metadata (Bedrock 1.19.80+)', () => {
+  // A hashed-runtime registry keys states by 32-bit hashes and leaves minStateId undefined, so stateId - minStateId is
+  // NaN. The metadata must instead be the state's index within the block's own states list.
+  const registry = require('prismarine-registry')('bedrock_1.17.10')
+  const Block = require('prismarine-block')(registry)
+  const hashes = [111111, 222222, 333333]
+  const stateShapes = [[[0, 0, 0, 1, 0.5, 1]], [[0, 0.5, 0, 1, 1, 1]], [[0, 0, 0, 0.5, 1, 1]]]
+  const enumBlock = { id: 9999, name: 'hashed_stairs', hardness: 1, minStateId: undefined, maxStateId: undefined, states: hashes, defaultState: hashes[0], shapes: stateShapes[0], stateShapes, boundingBox: 'block' }
+  for (const h of hashes) registry.blocksByStateId[h] = enumBlock
+
+  it('resolves metadata by state index and picks the matching per-state shape', () => {
+    for (let i = 0; i < hashes.length; i++) {
+      const block = Block.fromStateId(hashes[i], 0)
+      expect(block.name).toBe('hashed_stairs')
+      expect(Number.isNaN(block.metadata)).toBe(false)
+      expect(block.metadata).toBe(i)
+      expect(block.missingStateShape).toBeUndefined()
+      expect(block.shapes).toEqual(stateShapes[i])
+    }
+  })
+
+  it('resolves getProperties() for hashed stateIds via blockStatesByStateId', () => {
+    // The registry provides a stateId-keyed map for hashed versions (indexing the blockStates array by a hash misses).
+    const props = [{ weirdo_direction: { value: 0 } }, { weirdo_direction: { value: 1 } }, { weirdo_direction: { value: 2 } }]
+    registry.blockStatesByStateId = {}
+    for (let i = 0; i < hashes.length; i++) registry.blockStatesByStateId[hashes[i]] = { name: 'hashed_stairs', states: props[i] }
+    for (let i = 0; i < hashes.length; i++) {
+      const block = Block.fromStateId(hashes[i], 0)
+      expect(block.getProperties()).toEqual({ weirdo_direction: i })
+    }
+  })
+
+  it('resolves fromProperties() for hashed stateIds via the block states list', () => {
+    const props = [{ weirdo_direction: { value: 0 } }, { weirdo_direction: { value: 1 } }, { weirdo_direction: { value: 2 } }]
+    registry.blockStatesByStateId = {}
+    for (let i = 0; i < hashes.length; i++) registry.blockStatesByStateId[hashes[i]] = { name: 'hashed_stairs', states: props[i] }
+    registry.blocksByName = { ...registry.blocksByName, hashed_stairs: enumBlock }
+    for (let i = 0; i < hashes.length; i++) {
+      const block = Block.fromProperties('hashed_stairs', { weirdo_direction: i }, 0)
+      expect(block.stateId).toBe(hashes[i])
+    }
+  })
+
+  it('resolves the stateId from metadata for hashed blocks', () => {
+    registry.blocks = { ...registry.blocks, [enumBlock.id]: enumBlock }
+    for (let i = 0; i < hashes.length; i++) {
+      const block = new Block(enumBlock.id, 0, i)
+      expect(block.stateId).toBe(hashes[i])
+      expect(block.name).toBe('hashed_stairs')
+    }
+    expect(new Block(enumBlock.id, 0, hashes.length).stateId).toBe(hashes[hashes.length - 1])
+  })
+})
