@@ -35,6 +35,20 @@ describe('Block From Properties', () => {
     const block = Block.fromProperties(cauldronId, properties, 0)
     expect(block.getProperties()).toMatchObject(properties)
   })
+  it('returns the default Block when Bedrock properties do not match a state', () => {
+    const registry = require('prismarine-registry')('bedrock_1.17.10')
+    const Block = require('prismarine-block')(registry)
+    const blockData = registry.blocksByName.cauldron
+    const properties = { cauldron_liquid: 'invalid' }
+
+    for (const typeId of [blockData.id, blockData.name]) {
+      const block = Block.fromProperties(typeId, properties, 0)
+      assert.ok(block instanceof Block)
+      assert.strictEqual(block.stateId, blockData.defaultState)
+      assert.strictEqual(block.name, blockData.name)
+      assert.ok(typeof block.getProperties === 'function')
+    }
+  })
 })
 
 describe('versions should return block state and properties', () => {

@@ -252,7 +252,7 @@ function provider (registry, { Biome, version }) {
           if (Object.entries(properties).find(([prop, val]) => state[prop]?.value !== val)) continue
           return new Block(undefined, biomeId, 0, stateId)
         }
-        return block
+        return new Block(undefined, biomeId, 0, block.defaultState)
       }
     }
 
